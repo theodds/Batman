@@ -16,12 +16,15 @@ void TreeBackfit(std::vector<NodeType*>& forest,
     if(unif_rand() < MH_PRIOR) {
       forest[t] = draw_prior(forest[t], data);
     }
-    if(forest[t]->is_leaf || unif_rand() < MH_BD) {
+    else {
       birth_death(forest[t], data);
     }
-    else {
-      change_decision_rule(forest[t], data);
-    }
+    // if(forest[t]->is_leaf || unif_rand() < MH_BD) {
+    //   birth_death(forest[t], data);
+    // }
+    // else {
+    //   change_decision_rule(forest[t], data);
+    // }
     UpdateParams(forest[t], data);
     Refit(data, forest[t]);
   }
