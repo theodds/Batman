@@ -64,6 +64,7 @@ struct Node {
   bool is_left();
   void GetLimits();
   void BirthLeaves();
+  void GenBelow();
 
 };
 

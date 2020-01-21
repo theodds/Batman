@@ -69,7 +69,7 @@ void UpdateHypers(WeibParams& weib_params,
   vec lambda = get_params(trees);
 
   UpdateLambda0(weib_params, data);
-  UpdateScaleLambda(weib_params, lambda);
+  // UpdateScaleLambda(weib_params, lambda);
 }
 
 void UpdateScaleLambda(WeibParams& weib_params, const arma::vec& lambda)

@@ -9,9 +9,13 @@ void TreeBackfit(std::vector<NodeType*>& forest,
                  DataType& data) {
   
   double MH_BD = 0.7; 
+  double MH_PRIOR = 0.4;
   int num_trees = forest.size(); 
   for(int t = 0; t < num_trees; t++) {
     BackFit(data, forest[t]);
+    if(unif_rand() < MH_PRIOR) {
+      forest[t] = draw_prior(forest[t], data);
+    }
     if(forest[t]->is_leaf || unif_rand() < MH_BD) {
       birth_death(forest[t], data);
     }
@@ -158,7 +162,7 @@ NodeType* draw_prior(NodeType* tree, const DataType& data)
   double loglik_before = LogLT(tree, data);
 
   // Make new tree and compute loglik after
-  NodeType* tree_1 = new Nodetype(tree_0);
+  NodeType* tree_1 = new NodeType(tree_0);
   tree_1->is_root = true;
   tree_1->parent = tree_1;
   tree_1->depth = 0;
