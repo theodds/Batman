@@ -30,7 +30,7 @@ Rcpp::List WeibAugment(const arma::vec& failure_times,
 
   // Augment the failure times
   for(int i = 0; i < N; i++) {
-    double Lambda_0 = WeibCumHazard(failure_times[i], rate(i), shape);
+    double Lambda_0 = WeibCumHazard(failure_times(i), rate(i), shape);
     int num_reject = R::rpois(Lambda_0);
     for(int j = 0; j < num_reject; j++) {
       double A_bar = Lambda_0 * R::unif_rand();

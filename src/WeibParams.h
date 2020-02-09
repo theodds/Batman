@@ -9,13 +9,15 @@ struct WeibParams {
 WeibParams(double scale_lambda_,
            double shape_lambda_0_,
            double rate_lambda_0_,
-           double weibull_power_
+           double weibull_power_,
+           bool update_scale_
            ) :
   scale_lambda(scale_lambda_),
     sigma_scale_lambda(scale_lambda_),
     shape_lambda_0(shape_lambda_0_),
     rate_lambda_0(rate_lambda_0),
-    weibull_power(weibull_power_)
+    weibull_power(weibull_power_),
+    update_scale(update_scale_)
   {
     lambda_0 = 0.0;
     scale_lambda_to_ab();
@@ -34,6 +36,7 @@ WeibParams(double scale_lambda_,
   double sigma_scale_lambda;
   double lambda_0;
   double weibull_power;
+  bool update_scale;
 
 private:
 

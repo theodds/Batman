@@ -69,7 +69,7 @@ void UpdateHypers(WeibParams& weib_params,
   vec lambda = get_params(trees);
 
   UpdateLambda0(weib_params, data);
-  // UpdateScaleLambda(weib_params, lambda);
+  if(weib_params.update_scale) UpdateScaleLambda(weib_params, lambda);
 }
 
 void UpdateScaleLambda(WeibParams& weib_params, const arma::vec& lambda)
@@ -98,6 +98,7 @@ List WeibBart(const arma::mat& X,
               double weibull_power,
               bool do_ard,
               bool update_alpha,
+              bool update_scale,
               int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
@@ -107,7 +108,8 @@ List WeibBart(const arma::mat& X,
   WeibParams weib_params(scale_lambda,
                          shape_lambda_0,
                          rate_lambda_0,
-                         weibull_power);
+                         weibull_power,
+                         update_scale);
   WeibForest forest(num_trees, &tree_hypers, &weib_params);
   WeibData data(X,Y,W,idx);
   mat lambda = zeros<mat>(num_save, Y.size());
@@ -197,17 +199,19 @@ WeibModel::WeibModel(arma::sp_mat probs,
                      double scale_lambda,
                      double shape_lambda_0,
                      double rate_lambda_0,
-                     double weibull_power)
+                     double weibull_power,
+                     bool update_scale)
   : tree_hypers(probs),
-    weib_hypers(scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power),
+    weib_hypers(scale_lambda, shape_lambda_0, rate_lambda_0,
+                weibull_power, update_scale),
     forest(num_trees, &tree_hypers, &weib_hypers)
 {
 }
 
 
-WeibModel::~WeibModel() {
-  for(int i = 0; i < forest.trees.size(); i++) delete forest.trees[i];
-}
+// WeibModel::~WeibModel() {
+//   for(int i = 0; i < forest.trees.size(); i++) delete forest.trees[i];
+// }
 
 void WeibModel::do_ard() {
   tree_hypers.update_s = true;
@@ -217,7 +221,7 @@ void WeibModel::do_ard() {
 RCPP_MODULE(weib_forest) {
   class_<WeibModel>("WeibModel")
 
-     .constructor<arma::sp_mat, int, double, double, double, double>()
+    .constructor<arma::sp_mat, int, double, double, double, double, bool>()
     .method("do_gibbs", &WeibModel::do_gibbs)
     .method("get_s", &WeibModel::get_s)
     .method("set_s", &WeibModel::set_s)

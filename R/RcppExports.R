@@ -5,8 +5,8 @@ Batman <- function(X, Y, probs, num_cat, num_tree, scale_lambda, shape_lambda_0,
     .Call(`_Batman_Batman`, X, Y, probs, num_cat, num_tree, scale_lambda, shape_lambda_0, rate_lambda_0, scale_kappa, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_burn, num_thin, num_save, X_test, Y_test)
 }
 
-CoxBart <- function(X, Y, delta, order, L, U, probs, num_trees, scale_lambda, num_burn, num_thin, num_save) {
-    .Call(`_Batman_CoxBart`, X, Y, delta, order, L, U, probs, num_trees, scale_lambda, num_burn, num_thin, num_save)
+CoxBart <- function(X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save) {
+    .Call(`_Batman_CoxBart`, X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save)
 }
 
 MLogitBart <- function(X, Y, probs, num_cat, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, num_burn, num_thin, num_save) {
@@ -37,8 +37,8 @@ VarLogitBart <- function(X_logit, Y_logit, X_var, Y_var, probs, num_cat, num_tre
     .Call(`_Batman_VarLogitBart`, X_logit, Y_logit, X_var, Y_var, probs, num_cat, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, scale_kappa, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_burn, num_thin, num_save)
 }
 
-WeibBart <- function(X, Y, W, idx, probs, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power, do_ard, update_alpha, num_burn, num_thin, num_save) {
-    .Call(`_Batman_WeibBart`, X, Y, W, idx, probs, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power, do_ard, update_alpha, num_burn, num_thin, num_save)
+WeibBart <- function(X, Y, W, idx, probs, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power, do_ard, update_alpha, update_scale, num_burn, num_thin, num_save) {
+    .Call(`_Batman_WeibBart`, X, Y, W, idx, probs, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power, do_ard, update_alpha, update_scale, num_burn, num_thin, num_save)
 }
 
 rlgam <- function(shape) {

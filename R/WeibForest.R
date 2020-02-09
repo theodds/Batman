@@ -3,7 +3,8 @@ MakeWeib <- function(probs,
                      scale_lambda,
                      shape_lambda_0,
                      rate_lambda_0,
-                     weibull_power) {
+                     weibull_power,
+                     update_scale) {
 
   mf <- Module(module = "weib_forest", PACKAGE = "Batman")
   return(new(mf$WeibModel,
@@ -12,5 +13,6 @@ MakeWeib <- function(probs,
              scale_lambda,
              shape_lambda_0,
              rate_lambda_0,
-              weibull_power))
+              weibull_power,
+             update_scale))
 }

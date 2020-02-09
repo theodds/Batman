@@ -40,8 +40,8 @@ class WeibModel {
              double scale_lambda,
              double shape_lambda_0,
              double rate_lambda_0,
-             double weibull_power);
-  ~WeibModel();
+             double weibull_power, bool update_scale);
+  // ~WeibModel();
 
   arma::mat do_gibbs(const arma::mat& X,
            const arma::vec& Y,

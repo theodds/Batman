@@ -34,8 +34,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // CoxBart
-List CoxBart(const arma::mat& X, const arma::vec& Y, const arma::uvec& delta, const arma::uvec& order, const arma::uvec& L, const arma::uvec& U, const arma::sp_mat& probs, int num_trees, double scale_lambda, int num_burn, int num_thin, int num_save);
-RcppExport SEXP _Batman_CoxBart(SEXP XSEXP, SEXP YSEXP, SEXP deltaSEXP, SEXP orderSEXP, SEXP LSEXP, SEXP USEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+List CoxBart(const arma::mat& X, const arma::vec& Y, const arma::uvec& delta, const arma::uvec& order, const arma::uvec& L, const arma::uvec& U, const arma::sp_mat& probs, const arma::mat& X_test, int num_trees, double scale_lambda, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_CoxBart(SEXP XSEXP, SEXP YSEXP, SEXP deltaSEXP, SEXP orderSEXP, SEXP LSEXP, SEXP USEXP, SEXP probsSEXP, SEXP X_testSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,12 +46,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::uvec& >::type L(LSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type probs(probsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X_test(X_testSEXP);
     Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
     Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
     Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
     Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
     Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
-    rcpp_result_gen = Rcpp::wrap(CoxBart(X, Y, delta, order, L, U, probs, num_trees, scale_lambda, num_burn, num_thin, num_save));
+    rcpp_result_gen = Rcpp::wrap(CoxBart(X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -186,8 +187,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // WeibBart
-List WeibBart(const arma::mat& X, const arma::vec& Y, const arma::vec& W, const arma::uvec& idx, const arma::sp_mat& probs, int num_trees, double scale_lambda, double shape_lambda_0, double rate_lambda_0, double weibull_power, bool do_ard, bool update_alpha, int num_burn, int num_thin, int num_save);
-RcppExport SEXP _Batman_WeibBart(SEXP XSEXP, SEXP YSEXP, SEXP WSEXP, SEXP idxSEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP shape_lambda_0SEXP, SEXP rate_lambda_0SEXP, SEXP weibull_powerSEXP, SEXP do_ardSEXP, SEXP update_alphaSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+List WeibBart(const arma::mat& X, const arma::vec& Y, const arma::vec& W, const arma::uvec& idx, const arma::sp_mat& probs, int num_trees, double scale_lambda, double shape_lambda_0, double rate_lambda_0, double weibull_power, bool do_ard, bool update_alpha, bool update_scale, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_WeibBart(SEXP XSEXP, SEXP YSEXP, SEXP WSEXP, SEXP idxSEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP shape_lambda_0SEXP, SEXP rate_lambda_0SEXP, SEXP weibull_powerSEXP, SEXP do_ardSEXP, SEXP update_alphaSEXP, SEXP update_scaleSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -203,10 +204,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type weibull_power(weibull_powerSEXP);
     Rcpp::traits::input_parameter< bool >::type do_ard(do_ardSEXP);
     Rcpp::traits::input_parameter< bool >::type update_alpha(update_alphaSEXP);
+    Rcpp::traits::input_parameter< bool >::type update_scale(update_scaleSEXP);
     Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
     Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
     Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
-    rcpp_result_gen = Rcpp::wrap(WeibBart(X, Y, W, idx, probs, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power, do_ard, update_alpha, num_burn, num_thin, num_save));
+    rcpp_result_gen = Rcpp::wrap(WeibBart(X, Y, W, idx, probs, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, weibull_power, do_ard, update_alpha, update_scale, num_burn, num_thin, num_save));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -309,7 +311,7 @@ RcppExport SEXP _rcpp_module_boot_weib_forest();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_Batman_Batman", (DL_FUNC) &_Batman_Batman, 17},
-    {"_Batman_CoxBart", (DL_FUNC) &_Batman_CoxBart, 12},
+    {"_Batman_CoxBart", (DL_FUNC) &_Batman_CoxBart, 13},
     {"_Batman_MLogitBart", (DL_FUNC) &_Batman_MLogitBart, 11},
     {"_Batman_PoisBart", (DL_FUNC) &_Batman_PoisBart, 9},
     {"_Batman_RegBart", (DL_FUNC) &_Batman_RegBart, 9},
@@ -317,7 +319,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_WeibAugment", (DL_FUNC) &_Batman_WeibAugment, 4},
     {"_Batman_VarBart", (DL_FUNC) &_Batman_VarBart, 11},
     {"_Batman_VarLogitBart", (DL_FUNC) &_Batman_VarLogitBart, 17},
-    {"_Batman_WeibBart", (DL_FUNC) &_Batman_WeibBart, 15},
+    {"_Batman_WeibBart", (DL_FUNC) &_Batman_WeibBart, 16},
     {"_Batman_rlgam", (DL_FUNC) &_Batman_rlgam, 1},
     {"_Batman_gaussian_gaussian_marginal_loglik", (DL_FUNC) &_Batman_gaussian_gaussian_marginal_loglik, 5},
     {"_Batman_trigamma_inverse", (DL_FUNC) &_Batman_trigamma_inverse, 1},

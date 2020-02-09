@@ -69,6 +69,7 @@ List CoxBart(const arma::mat& X,
              const arma::uvec& L,
              const arma::uvec& U,
              const arma::sp_mat& probs,
+             const arma::mat& X_test,
              int num_trees,
              double scale_lambda,
              int num_burn, int num_thin, int num_save)
@@ -77,7 +78,9 @@ List CoxBart(const arma::mat& X,
   CoxParams cox_params(scale_lambda, scale_lambda);
   CoxForest forest(num_trees, &tree_hypers, &cox_params);
   CoxData data(X, Y, delta, order, L, U);
-  mat lambda = zeros<mat>(num_save, Y.size());
+  mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
+  mat lambda_train = zeros<mat>(num_save, X.n_rows);
+  mat phi = zeros<mat>(num_save, Y.size());
   umat counts = zeros<umat>(num_save, probs.n_cols);
 
   for(int iter = 0; iter < num_burn; iter++) {
@@ -95,17 +98,19 @@ List CoxBart(const arma::mat& X,
     if((iter+1) % 100 == 0) {
       Rcout << "\rFinishing save " << iter+1 << "\t\t\t\t";
     }
-    lambda.row(iter) = trans(data.lambda_hat);
+    lambda_test.row(iter) = trans(PredictCox(forest.trees, X_test));
+    lambda_train.row(iter) = trans(data.lambda_hat);
+    phi.row(iter) = trans(data.phi);
     counts.row(iter) = trans(get_var_counts(forest.trees));
   }
 
   List out;
-  out["lambda"] = lambda;
+  out["lambda_test"] = lambda_test;
+  out["lambda_train"] = lambda_train;
+  out["hazard"] = phi;
   out["counts"] = counts;
   out["order"] = data.order;
-
   return out;
-
 }
 
 
