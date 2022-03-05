@@ -19,8 +19,8 @@ TreeHypers::TreeHypers(const arma::sp_mat& probs_) {
   alpha_shape_1 = 0.5;
   alpha_shape_2 = 1.0;
 
-  update_s = false;
-  update_alpha = false;
+  update_s = true;
+  update_alpha = true;
 
 }
 

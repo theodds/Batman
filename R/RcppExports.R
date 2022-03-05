@@ -17,8 +17,8 @@ PoisBart <- function(X, Y, probs, num_trees, scale_lambda, scale_lambda_0, num_b
     .Call(`_Batman_PoisBart`, X, Y, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
-RegBart <- function(X, Y, probs, num_trees, scale_sigma, scale_sigma_mu, num_burn, num_thin, num_save) {
-    .Call(`_Batman_RegBart`, X, Y, probs, num_trees, scale_sigma, scale_sigma_mu, num_burn, num_thin, num_save)
+RegBart <- function(X, Y, X_test, probs, num_trees, scale_sigma, scale_sigma_mu, num_burn, num_thin, num_save) {
+    .Call(`_Batman_RegBart`, X, Y, X_test, probs, num_trees, scale_sigma, scale_sigma_mu, num_burn, num_thin, num_save)
 }
 
 doit <- function() {

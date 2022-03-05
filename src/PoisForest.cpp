@@ -22,6 +22,7 @@ void UpdateHypers(PoisParams& hypers, std::vector<PoisNode*>& trees,
 // [[Rcpp::export]]
 List PoisBart(const arma::mat& X,
               const arma::vec& Y,
+              const arma::mat& X_test,
               const arma::sp_mat& probs,
               int num_trees,
               double scale_lambda,
@@ -33,6 +34,7 @@ List PoisBart(const arma::mat& X,
   PoisForest forest(num_trees, &tree_hypers, &pois_params);
   PoisData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());
+  mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
   umat counts = zeros<umat>(num_save, probs.n_cols);
 
   for(int iter = 0; iter < num_burn; iter++) {
@@ -44,11 +46,13 @@ List PoisBart(const arma::mat& X,
       IterateGibbs(forest.trees, data, pois_params, tree_hypers);
     }
     lambda.row(iter) = trans(data.lambda_hat);
+    lambda_test.row(iter) = trans(PredictPois(forest.trees, X_test));
     counts.row(iter) = trans(get_var_counts(forest.trees));
   }
 
   List out;
   out["lambda"] = lambda;
+  out["lambda_test"] = lambda_test;
   out["counts"] = counts;
 
   return out;

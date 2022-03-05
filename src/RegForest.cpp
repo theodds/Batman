@@ -61,6 +61,7 @@ void UpdateSigmaMu(RegParams& hypers, std::vector<RegNode*>& forest) {
 // [[Rcpp::export]]
 List RegBart(const arma::mat& X,
              const arma::vec& Y,
+             const arma::mat& X_test,
              const arma::sp_mat& probs,
              int num_trees,
              double scale_sigma,
@@ -73,22 +74,29 @@ List RegBart(const arma::mat& X,
   RegForest forest(num_trees, &tree_hypers, &reg_params); 
   RegData data(X, Y);
   mat mu = zeros<mat>(num_save, Y.size());
+  mat mu_test = zeros<mat>(num_save, X_test.n_rows);
   umat counts = zeros<umat>(num_save, probs.n_cols);
 
   for(int iter = 0; iter < num_burn; iter++) {
     IterateGibbs(forest.trees, data, reg_params, tree_hypers);
+    if((iter + 1) % 100 == 0) 
+      Rcpp::Rcout << "Finishing warmup " << iter + 1 << "\n";
   }
 
   for(int iter = 0; iter < num_save; iter++) {
     for(int j = 0; j < num_thin; j++) {
       IterateGibbs(forest.trees, data, reg_params, tree_hypers); 
     }
+    if((iter + 1) % 100 == 0) 
+      Rcpp::Rcout << "Finishing save " << iter + 1 << "\n";
     mu.row(iter) = trans(data.mu_hat);
+    mu_test.row(iter) = trans(PredictReg(forest.trees, X_test));
     counts.row(iter) = trans(get_var_counts(forest.trees));
   }
   
   List out; 
   out["mu"] = mu;
+  out["mu_test"] = mu_test;
   out["counts"] = counts;
   return out;
 }
