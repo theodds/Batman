@@ -39,12 +39,16 @@ List PoisBart(const arma::mat& X,
 
   for(int iter = 0; iter < num_burn; iter++) {
     IterateGibbs(forest.trees, data, pois_params, tree_hypers);
+    if(iter % 100 == 0) Rcout << "\rFinishing warmup iteration "
+                              << iter << "\t\t\t";
   }
 
   for(int iter = 0; iter < num_save; iter++) {
     for(int j = 0; j < num_thin; j++) {
       IterateGibbs(forest.trees, data, pois_params, tree_hypers);
     }
+    if(iter % 100 == 0) Rcout << "\rFinishing save iteration "
+                              << iter << "\t\t\t";
     lambda.row(iter) = trans(data.lambda_hat);
     lambda_test.row(iter) = trans(PredictPois(forest.trees, X_test));
     counts.row(iter) = trans(get_var_counts(forest.trees));
