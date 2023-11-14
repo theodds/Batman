@@ -9,12 +9,24 @@ CoxBart <- function(X, Y, delta, order, L, U, probs, X_test, num_trees, scale_la
     .Call(`_Batman_CoxBart`, X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save)
 }
 
+convertListToVector <- function(list) {
+    .Call(`_Batman_convertListToVector`, list)
+}
+
+CoxPEBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save) {
+    .Call(`_Batman_CoxPEBart`, X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save)
+}
+
 MLogitBart <- function(X, Y, probs, num_cat, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, num_burn, num_thin, num_save) {
     .Call(`_Batman_MLogitBart`, X, Y, probs, num_cat, num_trees, scale_lambda, shape_lambda_0, rate_lambda_0, num_burn, num_thin, num_save)
 }
 
 PoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
     .Call(`_Batman_PoisBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
+}
+
+QPoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
+    .Call(`_Batman_QPoisBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
 RegBart <- function(X, Y, X_test, probs, num_trees, scale_sigma, scale_sigma_mu, num_burn, num_thin, num_save) {

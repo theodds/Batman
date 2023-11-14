@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // Batman
 Rcpp::List Batman(const arma::mat& X, const arma::vec& Y, const arma::sp_mat& probs, int num_cat, int num_tree, double scale_lambda, double shape_lambda_0, double rate_lambda_0, double scale_kappa, double sigma_scale_log_tau, double shape_tau_0, double rate_tau_0, int num_burn, int num_thin, int num_save, const arma::mat& X_test, const arma::vec& Y_test);
 RcppExport SEXP _Batman_Batman(SEXP XSEXP, SEXP YSEXP, SEXP probsSEXP, SEXP num_catSEXP, SEXP num_treeSEXP, SEXP scale_lambdaSEXP, SEXP shape_lambda_0SEXP, SEXP rate_lambda_0SEXP, SEXP scale_kappaSEXP, SEXP sigma_scale_log_tauSEXP, SEXP shape_tau_0SEXP, SEXP rate_tau_0SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP, SEXP X_testSEXP, SEXP Y_testSEXP) {
@@ -56,6 +61,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// convertListToVector
+std::vector<std::vector<int>> convertListToVector(Rcpp::List list);
+RcppExport SEXP _Batman_convertListToVector(SEXP listSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type list(listSEXP);
+    rcpp_result_gen = Rcpp::wrap(convertListToVector(list));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CoxPEBart
+List CoxPEBart(const arma::mat& X, const arma::vec& Y, const arma::uvec& delta, Rcpp::List bin_to_obs_list, const arma::uvec& obs_to_bin, const arma::vec& time_grid, const arma::vec& bin_width, const arma::vec& base_haz_init, const arma::sp_mat& probs, const arma::mat& X_test, int num_trees, double scale_lambda, bool do_rel_surv, const arma::vec& pop_haz_, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_CoxPEBart(SEXP XSEXP, SEXP YSEXP, SEXP deltaSEXP, SEXP bin_to_obs_listSEXP, SEXP obs_to_binSEXP, SEXP time_gridSEXP, SEXP bin_widthSEXP, SEXP base_haz_initSEXP, SEXP probsSEXP, SEXP X_testSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP do_rel_survSEXP, SEXP pop_haz_SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type bin_to_obs_list(bin_to_obs_listSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type obs_to_bin(obs_to_binSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_grid(time_gridSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type bin_width(bin_widthSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type base_haz_init(base_haz_initSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type probs(probsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X_test(X_testSEXP);
+    Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
+    Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type do_rel_surv(do_rel_survSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type pop_haz_(pop_haz_SEXP);
+    Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
+    Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
+    Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
+    rcpp_result_gen = Rcpp::wrap(CoxPEBart(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save));
+    return rcpp_result_gen;
+END_RCPP
+}
 // MLogitBart
 List MLogitBart(const arma::mat& X, const arma::uvec& Y, const arma::sp_mat& probs, int num_cat, int num_trees, double scale_lambda, double shape_lambda_0, double rate_lambda_0, int num_burn, int num_thin, int num_save);
 RcppExport SEXP _Batman_MLogitBart(SEXP XSEXP, SEXP YSEXP, SEXP probsSEXP, SEXP num_catSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP shape_lambda_0SEXP, SEXP rate_lambda_0SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
@@ -94,6 +137,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
     Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
     rcpp_result_gen = Rcpp::wrap(PoisBart(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save));
+    return rcpp_result_gen;
+END_RCPP
+}
+// QPoisBart
+List QPoisBart(const arma::mat& X, const arma::vec& Y, const arma::mat& X_test, const arma::sp_mat& probs, int num_trees, double scale_lambda, double scale_lambda_0, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_QPoisBart(SEXP XSEXP, SEXP YSEXP, SEXP X_testSEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP scale_lambda_0SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X_test(X_testSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type probs(probsSEXP);
+    Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
+    Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type scale_lambda_0(scale_lambda_0SEXP);
+    Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
+    Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
+    Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
+    rcpp_result_gen = Rcpp::wrap(QPoisBart(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -314,8 +377,11 @@ RcppExport SEXP _rcpp_module_boot_weib_forest();
 static const R_CallMethodDef CallEntries[] = {
     {"_Batman_Batman", (DL_FUNC) &_Batman_Batman, 17},
     {"_Batman_CoxBart", (DL_FUNC) &_Batman_CoxBart, 13},
+    {"_Batman_convertListToVector", (DL_FUNC) &_Batman_convertListToVector, 1},
+    {"_Batman_CoxPEBart", (DL_FUNC) &_Batman_CoxPEBart, 17},
     {"_Batman_MLogitBart", (DL_FUNC) &_Batman_MLogitBart, 11},
     {"_Batman_PoisBart", (DL_FUNC) &_Batman_PoisBart, 10},
+    {"_Batman_QPoisBart", (DL_FUNC) &_Batman_QPoisBart, 10},
     {"_Batman_RegBart", (DL_FUNC) &_Batman_RegBart, 10},
     {"_Batman_doit", (DL_FUNC) &_Batman_doit, 0},
     {"_Batman_WeibAugment", (DL_FUNC) &_Batman_WeibAugment, 4},

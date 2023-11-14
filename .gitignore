@@ -1,6 +1,7 @@
 
 \.RData
 
+.Rhistory
 .Rproj.user/
 *.out
 *.o

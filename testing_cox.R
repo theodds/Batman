@@ -71,6 +71,7 @@ fit_coxbart <- CoxBart(proc_dat$X,
                        proc_dat$L, 
                        proc_dat$U, 
                        probs, 
+                       proc_dat$X,
                        num_trees, scale_lambda, num_burn, num_thin, num_save)
 
 

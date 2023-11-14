@@ -2,6 +2,7 @@ library(Batman)
 library(dbarts)
 library(zeallot)
 library(Matrix)
+library(tidyverse)
 
 P <- 10
 N <- 250
@@ -32,3 +33,5 @@ system.time({
 plot(log(lambda), colMeans(out$lambda))
 rmse(log(lambda), colMeans(out$lambda))
 abline(a=0,b=1)
+
+
