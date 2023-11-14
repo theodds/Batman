@@ -1,34 +1,31 @@
-#ifndef VAR_NODE_H
-#define VAR_NODE_H
+#ifndef RVAR_NODE_H
+#define RVAR_NODE_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
-#include "VarParams.h"
-#include "VarData.h"
-#include "VarSS.h"
+#include "RVarParams.h"
+#include "RVarData.h"
+#include "RVarSS.h"
 
-struct VarNode : public Node<VarNode> {
+struct RVarNode : public Node<RVarNode> {
   
   double tau;
-  double mu;
-  const VarParams* var_params;
-  VarSuffStats ss;
+  const RVarParams* var_params;
+  RVarSuffStats ss;
 
- VarNode(TreeHypers* tree_hypers_, VarParams* var_params_) :
-  Node<VarNode>(tree_hypers_), ss() {
+ RVarNode(TreeHypers* tree_hypers_, RVarParams* var_params_) :
+  Node<RVarNode>(tree_hypers_), ss() {
     tau = 1.0;
-    mu = 0.0;
     var_params = var_params_;
   }
 
- VarNode(VarNode* parent) : Node<VarNode>(parent), ss() {
+ RVarNode(RVarNode* parent) : Node<RVarNode>(parent), ss() {
     tau = 1.0;
-    mu = 0.0;
     var_params = parent->var_params;
   }
 
-  void AddSuffStat(const VarData& data, int i);
-  void UpdateSuffStat(const VarData& data);
+  void AddSuffStat(const RVarData& data, int i);
+  void UpdateSuffStat(const RVarData& data);
 
   void ResetSuffStat() {
     ss.Reset();
@@ -39,11 +36,11 @@ struct VarNode : public Node<VarNode> {
   }
 };
 
-arma::vec PredictVar(VarNode* tree, const arma::rowvec& x);
-arma::mat PredictVar(VarNode* tree, const arma::mat& X);
-void BackFit(VarData& data, VarNode* tree);
-void Refit(VarData& data, VarNode* tree);
-double LogLT(VarNode* root, const VarData& data);
-void UpdateParams(VarNode* root, const VarData& data);
+arma::vec PredictVar(RVarNode* tree, const arma::rowvec& x);
+arma::mat PredictVar(RVarNode* tree, const arma::mat& X);
+void BackFit(RVarData& data, RVarNode* tree);
+void Refit(RVarData& data, RVarNode* tree);
+double LogLT(RVarNode* root, const RVarData& data);
+void UpdateParams(RVarNode* root, const RVarData& data);
 
 #endif

@@ -1,32 +1,27 @@
-#ifndef VAR_PARAMS_H
-#define VAR_PARAMS_H
+#ifndef RVAR_PARAMS_H
+#define RVAR_PARAMS_H
 
 #include<RcppArmadillo.h>
 #include "Node.h"
 #include "functions.h"
 
-struct VarParams {
+struct RVarParams {
 
-VarParams(double kappa_,
-          double scale_log_tau_,
-          double sigma_scale_log_tau_,
-          double shape_tau_0_,
-          double rate_tau_0_,
-          double scale_kappa_) :
-  kappa(kappa_), scale_log_tau(scale_log_tau_),
+RVarParams(double scale_log_tau_,
+           double sigma_scale_log_tau_,
+           double shape_tau_0_,
+           double rate_tau_0_) :
+  scale_log_tau(scale_log_tau_),
     sigma_scale_log_tau(sigma_scale_log_tau_),
-    shape_tau_0(shape_tau_0_), rate_tau_0(rate_tau_0_),
-    scale_kappa(scale_kappa_)
+    shape_tau_0(shape_tau_0_), rate_tau_0(rate_tau_0_)
   {
     tau_0 = 1.0;
     scale_lambda_to_ab();
   }
 
-  double kappa;
   double shape_tau_0;
   double rate_tau_0;
   double tau_0;
-  double scale_kappa;
   double sigma_scale_log_tau;
 
   double get_alpha() const {return alpha;}
