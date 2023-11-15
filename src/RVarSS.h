@@ -1,4 +1,4 @@
-#ifndef RVAR_SS_H
+#ifndef RVAR_SS_
 #define RVAR_SS_H
 
 #include <RcppArmadillo.h>

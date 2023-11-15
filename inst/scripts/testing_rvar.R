@@ -7,9 +7,9 @@ library(Matrix)
 
 ## Sim ----
 
-set.seed(7658)
+# set.seed(7658)
 
-num_tree <- 50
+num_tree <- 20
 
 sim_data <- function(n,p) {
   X <- matrix(runif(n * p), nrow = n)
@@ -33,15 +33,15 @@ empirical_sigma <- sqrt(mean(empirical_lm$residuals^2))
 
 out <- RVarBart(X = X, Y = Y_scale,
                 probs = probs,
-                sigma_scale_log_tau = 1.5 / sqrt(num_tree),
-                shape_tau_0 = 3,
-                rate_tau_0 = 3,
+                sigma_scale_log_tau = 1 / sqrt(num_tree),
+                shape_tau_0 = 0.1,
+                rate_tau_0 = 0.1,
                 num_trees = num_tree,
                 num_burn = 4000,
                 num_thin = 1,
                 num_save = 4000)
 
-outr <- rbart(X, Y, ntree = 50, ntreeh = 50, ndpost = 4000, nskip = 4000)
+outr <- rbart(X, Y, ntree = num_tree, ntreeh = num_tree, ndpost = 4000, nskip = 4000)
 
 ## Collect predictions for rbart and RVarBart ----
 
@@ -53,8 +53,10 @@ sigma_hat <- colMeans(1/sqrt(out$tau)) * sigma_Y
 par(mfrow = c(1,2))
 
 plot(X, sigma)
-lines(X[o], sigma_hat[o])
-lines(X[o], pred_outr$smean[o], col = 'red')
+points(X, sigma_hat, col = 'green', pch = 2)
+points(X, pred_outr$smean, col = 'blue')
+
+plot(out$scale_lambda, type = 'l')
 
 ## Measure Accuracy ----
 

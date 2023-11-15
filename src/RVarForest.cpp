@@ -53,7 +53,7 @@ void UpdateTau0(RVarParams& var_params, RVarData& data) {
 }
 
 void UpdateScaleLogTau(RVarParams& var_params, std::vector<double>& tau) {
-  double n = (double)tau.size();
+  double n = tau.size();
   double sum_lambda = 0.;
   double sum_exp_lambda = 0.;
   for(int i = 0; i < tau.size(); i++) {
@@ -61,13 +61,57 @@ void UpdateScaleLogTau(RVarParams& var_params, std::vector<double>& tau) {
     sum_exp_lambda += tau[i];
   }
   double scale = var_params.sigma_scale_log_tau;
-  ScaleLambdaLoglik* loglik =
-    new ScaleLambdaLoglik(n, sum_lambda, sum_exp_lambda, scale);
-  double scale_0 = var_params.get_scale_log_tau();
-  double scale_1 = slice_sampler(scale_0, loglik, 1., 0., R_PosInf);
-  var_params.set_scale_log_tau(scale_1);
+  
+  double alpha, beta;
 
-  delete loglik;
+  for(int k = 0; k < 30; k++) {
+    // Compute old likleihood
+    double scale_old = var_params.get_scale_log_tau();
+    scale_lambda_to_alpha_beta(alpha, beta, scale_old);
+    double loglik_old = n * alpha * log(beta) - n * R::lgammafn(alpha)
+      + alpha * sum_lambda - beta * sum_exp_lambda
+      - 0.5 * pow(scale_old / scale, 2.0) + log(scale_old);
+
+    // Proposal
+    double scale_new = exp(log(scale_old) + 2. * unif_rand() - 1.0);
+    scale_lambda_to_alpha_beta(alpha, beta, scale_new);
+    double loglik_new= n * alpha * log(beta) - n * R::lgammafn(alpha)
+      + alpha * sum_lambda - beta * sum_exp_lambda
+      - 0.5 * pow(scale_new / scale, 2.0) + log(scale_new);
+  
+    if(log(unif_rand()) < loglik_new - loglik_old) {
+      var_params.set_scale_log_tau(scale_new);
+    }
+  }
+
+  // // Compute old likelihood
+  // double alpha, beta;
+  // double scale_old = var_params.get_scale_log_tau();
+  // scale_lambda_to_alpha_beta(alpha, beta, scale_old);
+  // double loglik_old = n * alpha * log(beta) 
+  //   - n * R::lgammafn(alpha)
+  //   + alpha * sum_lambda
+  //   - beta * sum_exp_lambda;
+  
+  // // Sample from the prior
+  // double scale_new = fabs(norm_rand() / norm_rand() * scale);
+  // scale_lambda_to_alpha_beta(alpha, beta, scale_new);
+  // double loglik_new = n * alpha * log(beta) 
+  //   - n * R::lgammafn(alpha)
+  //   + alpha * sum_lambda
+  //   - beta * sum_exp_lambda;
+
+  // if(log(unif_rand()) < loglik_new - loglik_old) {
+  //   var_params.set_scale_log_tau(scale_new);
+  // }
+  
+  // ScaleLambdaLoglik* loglik =
+  //   new ScaleLambdaLoglik(n, sum_lambda, sum_exp_lambda, scale);
+  // double scale_0 = var_params.get_scale_log_tau();
+  // double scale_1 = slice_sampler(scale_0, loglik, 1., 0., R_PosInf);
+  // var_params.set_scale_log_tau(scale_1);
+
+  // delete loglik;
 }
 
 // [[Rcpp::export]]
@@ -88,6 +132,7 @@ List RVarBart(const arma::mat& X,
   RVarData data(X, Y);
   mat tau = zeros<mat>(num_save, Y.size());
   umat counts = zeros<umat>(num_save, probs.n_cols);
+  vec scale_lambda = zeros<vec>(num_save);
 
   for(int iter = 0; iter < num_burn; iter++) {
     IterateGibbs(forest.trees, data, var_params, tree_hypers);
@@ -102,12 +147,14 @@ List RVarBart(const arma::mat& X,
     }
     tau.row(iter) = trans(data.tau_hat);
     counts.row(iter) = trans(get_var_counts(forest.trees));
+    scale_lambda(iter) = var_params.get_scale_log_tau();
     if(iter % 100 == 99) {
       Rcpp::Rcout << "\rFinishing warmup " << iter + 1 << "\t\t\t";
     }
   }
   List out;
   out["tau"] = tau;
+  out["scale_lambda"] = scale_lambda;
   out["counts"] = counts;
   
   return out;

@@ -89,7 +89,8 @@ struct ScaleLambdaLoglik : Loglik {
       + alpha * sum_lambda
       - beta * sum_exp_lambda
       + M_LN2 - LN_2_BY_PI
-      - log(1.0 + pow(sigma/scale, 2.0));
+      // - log(1.0 + pow(sigma/scale, 2.0));
+      - 0.5 * pow(sigma / scale, 2.0);
     /* Rcpp::Rcout << " " << out << std::endl; */
     return out;
   }
