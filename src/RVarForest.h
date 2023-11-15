@@ -25,7 +25,7 @@ struct RVarForest {
   }
 };
 
-arma::mat PredictVar(std::vector<RVarNode*>& forest, const arma::mat& X);
+arma::vec PredictVar(std::vector<RVarNode*>& forest, const arma::mat& X);
 void UpdateHypers(RVarParams& var_params,
                   std::vector<RVarNode*>& trees,
                   const RVarData& data);

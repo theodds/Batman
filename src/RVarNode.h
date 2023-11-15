@@ -36,8 +36,8 @@ struct RVarNode : public Node<RVarNode> {
   }
 };
 
-arma::vec PredictVar(RVarNode* tree, const arma::rowvec& x);
-arma::mat PredictVar(RVarNode* tree, const arma::mat& X);
+double PredictVar(RVarNode* tree, const arma::rowvec& x);
+arma::vec PredictVar(RVarNode* tree, const arma::mat& X);
 void BackFit(RVarData& data, RVarNode* tree);
 void Refit(RVarData& data, RVarNode* tree);
 double LogLT(RVarNode* root, const RVarData& data);

@@ -54,6 +54,14 @@ double gaussian_gaussian_draw_posterior(double n,
                                         double prec_y,
                                         double prec_mu);
 
+double weighted_normal_mean0_gamma_loglik(double n,
+                                          double sum_eta,
+                                          double sum_eta_y,
+                                          double sum_eta_y_sq,
+                                          double sum_log_eta,
+                                          double alpha,
+                                          double beta);
+
 double weighted_normal_gamma_loglik(int n,
                                     double sum_eta,
                                     double sum_eta_y,

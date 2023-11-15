@@ -258,6 +258,43 @@ double gaussian_gaussian_draw_posterior(double n,
   return mu_up + sigma_up * norm_rand();
 }
 
+double weighted_normal_mean0_gamma_loglik(double n,
+                                          double sum_eta,
+                                          double sum_eta_y,
+                                          double sum_eta_y_sq,
+                                          double sum_log_eta,
+                                          double alpha,
+                                          double beta) {
+
+  double out = 0.;
+  if(n == 0) return out;
+
+  double alpha_up = alpha + 0.5 * n;
+  double beta_up = beta + 0.5 * sum_eta_y_sq;
+  
+  out += alpha * log(beta) - alpha_up * log(beta_up);
+  out += R::lgammafn(alpha_up) - R::lgammafn(alpha);
+  out += 0.5 * sum_log_eta - 0.5 * n * LN_2PI;
+
+  return out;
+}
+
+double weighted_normal_mean0_gamma_draw(double n,
+                                        double sum_eta,
+                                        double sum_eta_y,
+                                        double sum_eta_y_sq,
+                                        double sum_log_eta,
+                                        double alpha,
+                                        double beta) {
+  double out = 0.;
+  if(n == 0) return out;
+
+  double alpha_up = alpha + 0.5 * n;
+  double beta_up = beta + 0.5 * sum_eta_y_sq;
+
+  return R::rgamma(alpha_up, 1.0 / beta_up);
+}
+
 double weighted_normal_gamma_loglik(int n,
                                     double sum_eta,
                                     double sum_eta_y,

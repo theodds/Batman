@@ -1,4 +1,4 @@
-#include "VarForest.h"
+#include "RVarForest.h"
 
 using namespace arma;
 using namespace Rcpp;
