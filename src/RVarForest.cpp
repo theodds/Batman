@@ -3,56 +3,47 @@
 using namespace arma;
 using namespace Rcpp;
 
-
-arma::mat PredictVar(std::vector<VarNode*>& forest, const arma::mat& X) {
+arma::vec PredictVar(std::vector<RVarNode*>& forest, const arma::mat& X) {
   int N = forest.size();
-  vec mu = zeros<vec>(X.n_rows);
   vec tau = ones<vec>(X.n_rows);
   for(int n = 0; n < N; n++) {
-    mat tmp = PredictVar(forest[n], X);
-    mu = mu + tmp.col(0);
-    tau = tau % tmp.col(1);
+    tau = tau % PredictVar(forest[n], X);
   }
-  return join_rows(mu,tau);
+  return tau;
 }
 
-void UpdateHypers(VarParams& var_params,
-                  std::vector<VarNode*>& trees,
-                  VarData& data)
+void get_params(RVarNode* n,, std::vector<double>& tau) {
+  if(n->is_leaf) {
+    tau.push_back(n->tau);
+  }
+  else {
+    get_params(n->left, tau);
+    get_params(n->right, tau);
+  }
+}
+
+void UpdateHypers(RVarParams& var_params,
+                  std::vector<RVarNode*>& trees,
+                  RVarData& data)
 {
-  std::vector<double> mu;
   std::vector<double> tau;
   for(int i = 0; i < trees.size(); i++) {
-    get_params(trees[i], mu, tau);
+    get_params(trees[i], tau);
   }
   // Rcout << "Update Tau";
   UpdateTau0(var_params, data);
-  // Rcout << "Update Kappa";
-  UpdateKappa(var_params, mu, tau);
   // Rcout << "Update Scale";
   UpdateScaleLogTau(var_params, tau);
   // Rcout << "Done";
 }
 
-
-void get_params(VarNode* n, std::vector<double>& mu, std::vector<double>& tau) {
-  if(n->is_leaf) {
-    mu.push_back(n->mu);
-    tau.push_back(n->tau);
-  }
-  else {
-    get_params(n->left, mu, tau);
-    get_params(n->right, mu, tau);
-  }
-}
-
-void UpdateTau0(VarParams& var_params, VarData& data) {
+void UpdateTau0(RVarParams& var_params, RVarData& data) {
   int N = data.Y.size();
   double shape_up = var_params.shape_tau_0 + 0.5 * N;
   double rate_up = var_params.rate_tau_0;
   for(int i = 0; i < N; i++) {
     data.tau_hat(i) = data.tau_hat(i) / var_params.tau_0;
-    rate_up += 0.5 * data.tau_hat(i) * pow(data.Y(i) - data.mu_hat(i), 2.0);
+    rate_up += 0.5 * data.tau_hat(i) * pow(data.Y(i), 2.0);
   }
   double scale_up = 1.0 / rate_up;
   var_params.tau_0 = R::rgamma(shape_up, scale_up);
@@ -61,24 +52,7 @@ void UpdateTau0(VarParams& var_params, VarData& data) {
   }
 }
 
-void UpdateKappa(VarParams& var_params,
-                 std::vector<double>& mu,
-                 std::vector<double>& tau) {
-  int num_leaves = mu.size();
-  double shape_up = 0.5 * num_leaves + 1;
-  double rate_up = 0.;
-  for(int l = 0; l < num_leaves; l++) {
-    rate_up += 0.5 * tau[l] * pow(mu[l], 2.0);
-  }
-  double kappa_prop = R::rgamma(shape_up, 1.0 / rate_up);
-  double lograt = cauchy_jacobian(kappa_prop, var_params.scale_kappa) -
-    cauchy_jacobian(var_params.kappa, var_params.scale_kappa);
-  if(log(unif_rand()) < lograt) {
-    var_params.kappa = kappa_prop;
-  }
-}
-
-void UpdateScaleLogTau(VarParams& var_params, std::vector<double>& tau) {
+void UpdateScaleLogTau(RVarParams& var_params, std::vector<double>& tau) {
   double n = (double)tau.size();
   double sum_lambda = 0.;
   double sum_exp_lambda = 0.;
@@ -97,25 +71,21 @@ void UpdateScaleLogTau(VarParams& var_params, std::vector<double>& tau) {
 }
 
 // [[Rcpp::export]]
-List VarBart(const arma::mat& X,
+List RVarBart(const arma::mat& X,
              const arma::vec& Y,
              const arma::sp_mat& probs,
-             double scale_kappa,
              double sigma_scale_log_tau,
              double shape_tau_0, double rate_tau_0,
              int num_trees,
              int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  double kappa_init = pow(scale_kappa, -2.0);
-  VarParams var_params(kappa_init,
-                       sigma_scale_log_tau,
-                       sigma_scale_log_tau,
-                       shape_tau_0, rate_tau_0,
-                       scale_kappa);
-  VarForest forest(num_trees, &tree_hypers, &var_params);
-  VarData data(X, Y);
-  mat mu = zeros<mat>(num_save, Y.size());
+  RVarParams var_params(sigma_scale_log_tau,
+                        sigma_scale_log_tau,
+                        shape_tau_0,
+                        rate_tau_0);
+  RVarForest forest(num_trees, &tree_hypers, &var_params);
+  RVarData data(X, Y);
   mat tau = zeros<mat>(num_save, Y.size());
   umat counts = zeros<umat>(num_save, probs.n_cols);
 
@@ -130,7 +100,6 @@ List VarBart(const arma::mat& X,
     for(int j = 0; j < num_thin; j++) {
       IterateGibbs(forest.trees, data, var_params, tree_hypers);
     }
-    mu.row(iter) = trans(data.mu_hat);
     tau.row(iter) = trans(data.tau_hat);
     counts.row(iter) = trans(get_var_counts(forest.trees));
     if(iter % 100 == 99) {
@@ -138,11 +107,9 @@ List VarBart(const arma::mat& X,
     }
   }
   List out;
-  out["mu"] = mu;
   out["tau"] = tau;
   out["counts"] = counts;
-
+  
   return out;
 }
-
 
