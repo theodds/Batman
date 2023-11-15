@@ -12,7 +12,7 @@ arma::vec PredictVar(std::vector<RVarNode*>& forest, const arma::mat& X) {
   return tau;
 }
 
-void get_params(RVarNode* n,, std::vector<double>& tau) {
+void get_params(RVarNode* n, std::vector<double>& tau) {
   if(n->is_leaf) {
     tau.push_back(n->tau);
   }

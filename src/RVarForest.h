@@ -13,7 +13,7 @@ struct RVarForest {
   {
     trees.resize(0);
     for(int t = 0; t < num_trees; t++) {
-      VarNode* n = new RVarNode(tree_hypers_, var_params_);
+      RVarNode* n = new RVarNode(tree_hypers_, var_params_);
       trees.push_back(n);
     }
   }
