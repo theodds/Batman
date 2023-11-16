@@ -392,6 +392,7 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_var_forest();
 RcppExport SEXP _rcpp_module_boot_weib_forest();
 
 static const R_CallMethodDef CallEntries[] = {
@@ -417,6 +418,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_rcpparma_outerproduct", (DL_FUNC) &_Batman_rcpparma_outerproduct, 1},
     {"_Batman_rcpparma_innerproduct", (DL_FUNC) &_Batman_rcpparma_innerproduct, 1},
     {"_Batman_rcpparma_bothproducts", (DL_FUNC) &_Batman_rcpparma_bothproducts, 1},
+    {"_rcpp_module_boot_var_forest", (DL_FUNC) &_rcpp_module_boot_var_forest, 0},
     {"_rcpp_module_boot_weib_forest", (DL_FUNC) &_rcpp_module_boot_weib_forest, 0},
     {NULL, NULL, 0}
 };

@@ -22,6 +22,10 @@ void get_params(RVarNode* n, std::vector<double>& tau) {
   }
 }
 
+arma::vec RVarForest::do_predict(const arma::mat& X) {
+  return PredictVar(trees, X);
+}
+
 void UpdateHypers(RVarParams& var_params,
                   std::vector<RVarNode*>& trees,
                   RVarData& data)
@@ -160,3 +164,45 @@ List RVarBart(const arma::mat& X,
   return out;
 }
 
+/*
+ * Interface for accessing the model from within R
+ */
+
+arma::mat RVarForest::do_gibbs(const arma::mat& X, const arma::vec& Y,
+                               const arma::mat& X_test, int num_iter) {
+
+  vec tau_out = zeros<mat>(num_iter, X_test.n_rows);
+
+  RVarData data(X, Y);
+  data.tau_hat = do_predict(X);
+
+  for(int i = 0; i < num_iter; i++) {
+    IterateGibbs(trees, data, var_params, tree_hypers));
+    tau_out.row(i) = trans(do_predict(X_test));
+    num_gibbs++;
+    if(num_gibbs % 100 == 99) {
+      Rcpp::Rcout << "\rFinishing iteration  " << i + 1 << "\t\t\t";
+    }
+  }
+  Rcout << std::endl;
+  return tau_out;
+}
+
+RCPP_MODULE(var_forest) {
+
+  class_<RVarForest>("RVarForest")
+
+    .constructor<Rcpp::List, Rcpp::List>()
+    .method("do_gibbs", &RVarForest::do_gibbs)
+    .method("get_s", &RVarForest::get_s)
+    .method("get_counts", &RVarForest::get_counts)
+    .method("get_sigma_mu", &RVarForest::get_sigma_mu)
+    // .method("set_s", &Forest::set_s)
+    .method("get_sigma", &RVarForest::get_sigma)
+    // .method("set_sigma", &Forest::set_sigma)
+    .method("do_predict", &RVarForest::do_predict)
+    // .method("get_tree_counts", &Forest::get_tree_counts)
+    // .method("predict_iteration", &Forest::predict_iteration)
+    ;
+  
+}

@@ -16,8 +16,8 @@ struct TreeHypers {
   double alpha_shape_2;
 
   double get_s(int j){return s(j);}
+  arma::vec get_s(){return s;}
   double get_log_s(int j){return logs(j);}
-  arma::vec get_s() {return s;}
   int get_num_groups() const {return num_groups;}
   void set_s(arma::vec x) {s = x; logs = log(x);}
   void set_log_s(arma::vec x) {s = exp(x); logs = x;}
