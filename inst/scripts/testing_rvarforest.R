@@ -29,34 +29,31 @@ probs           <- Matrix(data = 1, nrow = 1, byrow = TRUE, sparse = TRUE)
 empirical_lm    <- lm(Y_scale ~ X)
 empirical_sigma <- sqrt(mean(empirical_lm$residuals^2))
 
-## Fit the model, and rbart for comparison ----
+## Making the corest ----
 
-out <- RVarBart(X = X, Y = Y_scale,
-                probs = probs,
-                sigma_scale_log_tau = 1 / sqrt(num_tree),
-                shape_tau_0 = 0.1,
-                rate_tau_0 = 0.1,
-                num_trees = num_tree,
-                num_burn = 4000,
-                num_thin = 1,
-                num_save = 4000)
+rvar_forest <- MakeRVar(probs)
+
+## Run warmup and save phases
+
+tau_warmup <- rvar_forest$do_gibbs(X, Y_scale, X, 4000)
+tau_save   <- rvar_forest$do_gibbs(X, Y_scale, X, 4000)
+
+## Fit the model, and rbart for comparison ----
 
 outr <- rbart(X, Y, ntree = num_tree, ntreeh = num_tree, ndpost = 4000, nskip = 4000)
 
 ## Collect predictions for rbart and RVarBart ----
 
 pred_outr <- predict(outr)
-sigma_hat <- colMeans(1/sqrt(out$tau)) * sigma_Y
+sigma_hat <- colMeans(1/sqrt(tau_save)) * sigma_Y
 
 ## Plot for comparison ----
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,1))
 
 plot(X, sigma)
 points(X, sigma_hat, col = 'green', pch = 2)
 points(X, pred_outr$smean, col = 'blue')
-
-plot(out$scale_lambda, type = 'l')
 
 ## Measure Accuracy ----
 

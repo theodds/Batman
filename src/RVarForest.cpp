@@ -23,7 +23,7 @@ void get_params(RVarNode* n, std::vector<double>& tau) {
 }
 
 arma::vec RVarForest::do_predict(const arma::mat& X) {
-  return PredictVar(trees, X);
+  return PredictVar(trees, X) * var_params->tau_0;
 }
 
 void UpdateHypers(RVarParams& var_params,
@@ -171,7 +171,7 @@ List RVarBart(const arma::mat& X,
 arma::mat RVarForest::do_gibbs(const arma::mat& X, const arma::vec& Y,
                                const arma::mat& X_test, int num_iter) {
 
-  vec tau_out = zeros<mat>(num_iter, X_test.n_rows);
+  mat tau_out = zeros<mat>(num_iter, X_test.n_rows);
 
   RVarData data(X, Y);
   data.tau_hat = do_predict(X);
@@ -181,7 +181,7 @@ arma::mat RVarForest::do_gibbs(const arma::mat& X, const arma::vec& Y,
     tau_out.row(i) = trans(do_predict(X_test));
     num_gibbs++;
     if(num_gibbs % 100 == 99) {
-      Rcpp::Rcout << "\rFinishing iteration  " << i + 1 << "\t\t\t";
+      Rcpp::Rcout << "\rFinishing iteration  " << num_gibbs + 1 << "\t\t\t";
     }
   }
   Rcout << std::endl;

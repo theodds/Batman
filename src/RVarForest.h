@@ -25,7 +25,7 @@ struct RVarForest {
   }
   
   RVarForest(Rcpp::List hypers, Rcpp::List opts) {
-    int num_gibbs = 0;
+    num_gibbs = 0;
     arma::sp_mat probs = hypers["probs"];
     tree_hypers = new TreeHypers(probs);
     

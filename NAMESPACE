@@ -1,3 +1,4 @@
 useDynLib(Batman, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
+importFrom(Rcpp, Module)
 exportPattern("^[[:alpha:]]+")

@@ -6,7 +6,7 @@
 struct RVarData {
   arma::mat X;
   arma::vec Y;
-  arma::mat tau_hat;
+  arma::vec tau_hat;
 
 RVarData(const arma::mat& X_, const arma::vec& Y_) : X(X_), Y(Y_)
   {

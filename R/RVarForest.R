@@ -5,7 +5,7 @@ MakeRVar <- function(probs,
                      k = 1.5
                      ) {
 
-  if(is.null(sigma_scale_log_tau)) sigma_scale_log_tau <- k / sqrt(num_tree)
+  sigma_scale_log_tau <- k / sqrt(num_tree)
   
   hypers <- list(probs = probs,
                  sigma_scale_log_tau = sigma_scale_log_tau,
