@@ -1,6 +1,6 @@
 MakeRVar <- function(probs,
                      num_tree = 50,
-                     shape_tau_0 = 0.1
+                     shape_tau_0 = 0.1,
                      rate_tau_0 = 0.1,
                      k = 1.5
                      ) {
