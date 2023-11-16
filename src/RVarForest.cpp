@@ -177,7 +177,7 @@ arma::mat RVarForest::do_gibbs(const arma::mat& X, const arma::vec& Y,
   data.tau_hat = do_predict(X);
 
   for(int i = 0; i < num_iter; i++) {
-    IterateGibbs(trees, data, var_params, tree_hypers));
+    IterateGibbs(trees, data, *var_params, *tree_hypers);
     tau_out.row(i) = trans(do_predict(X_test));
     num_gibbs++;
     if(num_gibbs % 100 == 99) {
