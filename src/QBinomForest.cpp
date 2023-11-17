@@ -63,7 +63,7 @@ List QBinomBart(const arma::mat& X,
   TreeHypers tree_hypers(probs);
   QBinomParams pois_params(scale_lambda_0, scale_lambda, 1.0);
   QBinomForest forest(num_trees, &tree_hypers, &pois_params);
-  QBinomData data(X,Y);
+  QBinomData data(X,Y, n);
   mat lambda = zeros<mat>(num_save, Y.size());
   mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
   umat counts = zeros<umat>(num_save, probs.n_cols);
