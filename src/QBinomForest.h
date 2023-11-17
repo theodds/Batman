@@ -1,33 +1,33 @@
-#ifndef POIS_FOREST_H
-#define POIS_FOREST_H
+#ifndef QBINOM_FOREST_H
+#define QBINOM_FOREST_H
 
 #include <RcppArmadillo.h>
-#include "QPoisNode.h"
-#include "QPoisData.h"
+#include "QBinomNode.h"
+#include "QBinomData.h"
 #include "mcmc.h"
 
 
-struct QPoisForest {
-  std::vector<QPoisNode*> trees;
+struct QBinomForest {
+  std::vector<QBinomNode*> trees;
 
-  QPoisForest(int num_trees, TreeHypers* tree_hypers, QPoisParams* pois_params) {
+  QBinomForest(int num_trees, TreeHypers* tree_hypers, QBinomParams* pois_params) {
     trees.resize(0);
     for(int t = 0; t < num_trees; t++) {
-      QPoisNode* n = new QPoisNode(tree_hypers, pois_params);
+      QBinomNode* n = new QBinomNode(tree_hypers, pois_params);
       trees.push_back(n);
     }
   }
 
-  ~QPoisForest() {
+  ~QBinomForest() {
     for(int t = 0; t < trees.size(); t++)
       delete trees[t];
   }
 
 };
 
-arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X);
+arma::vec PredictPois(std::vector<QBinomNode*>& forest, const arma::mat& X);
 
-void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
-                  const QPoisData& data);
+void UpdateHypers(QBinomParams& hypers, std::vector<QBinomNode*>& trees,
+                  QBinomData& data);
 
 #endif

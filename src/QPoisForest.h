@@ -1,5 +1,5 @@
-#ifndef POIS_FOREST_H
-#define POIS_FOREST_H
+#ifndef QPOIS_FOREST_H
+#define QPOIS_FOREST_H
 
 #include <RcppArmadillo.h>
 #include "QPoisNode.h"

@@ -4,7 +4,7 @@ using namespace arma;
 using namespace Rcpp;
 
 void QBinomNode::AddSuffStat(const QBinomData& data, int i, double phi) {
-  ss.Increment(data.Y(i), data.lambda_hat(i), phi);
+  ss.Increment(data.Y(i), data.rho(i), data.lambda_hat(i), phi);
   if(!is_leaf) {
     double x = data.X(i,var);
     if(x <= val) {
@@ -63,13 +63,12 @@ double LogLT(QBinomNode* root, const QBinomData& data) {
   int num_leaves = leafs.size();
 
   for(int i = 0; i < num_leaves; i++) {
-    double sum_Y = leafs[i]->ss.sum_Y;
-    double sum_Y_lambda_minus = leafs[i]->ss.sum_Y_lambda_minus;
-    double sum_exp_lambda_minus = leafs[i]->ss.sum_exp_lambda_minus;
-
-    out += poisson_lgamma_marginal_loglik(sum_Y,
-                                          sum_Y_lambda_minus,
-                                          sum_exp_lambda_minus,
+    double sum_Y_by_phi = leafs[i]->ss.sum_Y_by_phi;
+    double sum_exp_lambda_minus_by_phi = leafs[i]->ss.sum_exp_lambda_minus_by_phi;
+    
+    out += poisson_lgamma_marginal_loglik(sum_Y_by_phi,
+                                          0.,
+                                          sum_exp_lambda_minus_by_phi,
                                           root->pois_params->get_alpha(),
                                           root->pois_params->get_beta());
   }
@@ -81,13 +80,12 @@ void UpdateParams(QBinomNode* root, const QBinomData& data) {
   std::vector<QBinomNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
   for(int i = 0; i < num_leaves; i++) {
-    double sum_Y = leafs[i]->ss.sum_Y;
-    double sum_Y_lambda_minus = leafs[i]->ss.sum_Y_lambda_minus;
-    double sum_exp_lambda_minus = leafs[i]->ss.sum_exp_lambda_minus;
+    double sum_Y_by_phi = leafs[i]->ss.sum_Y_by_phi;
+    double sum_exp_lambda_minus_by_phi = leafs[i]->ss.sum_exp_lambda_minus_by_phi;
     leafs[i]->lambda =
-      poisson_lgamma_draw_posterior(sum_Y,
-                                    sum_Y_lambda_minus,
-                                    sum_exp_lambda_minus,
+      poisson_lgamma_draw_posterior(sum_Y_by_phi,
+                                    0.,
+                                    sum_exp_lambda_minus_by_phi,
                                     root->pois_params->get_alpha(),
                                     root->pois_params->get_beta());
   }
