@@ -10,7 +10,7 @@ struct QBinomParams {
   double sigma_scale_lambda;
   double phi;
 
-  QBinom(double scale_lambda_0_, double scale_lambda_, double phi_) :
+  QBinomParams(double scale_lambda_0_, double scale_lambda_, double phi_) :
     scale_lambda(scale_lambda_), 
     phi(phi_),
     sigma_scale_lambda(scale_lambda_),

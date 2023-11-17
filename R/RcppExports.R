@@ -25,6 +25,10 @@ PoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_
     .Call(`_Batman_PoisBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
+QBinomBart <- function(X, Y, n, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
+    .Call(`_Batman_QBinomBart`, X, Y, n, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
+}
+
 QPoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
     .Call(`_Batman_QPoisBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
