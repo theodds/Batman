@@ -1,16 +1,16 @@
-#ifndef QPOIS_PARAMS_H
-#define QPOIS_PARAMS_H
+#ifndef QBINOM_PARAMS_H
+#define QBINOM_PARAMS_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
 
-struct QPoisParams {
+struct QBinomParams {
 
   double scale_lambda_0;
   double sigma_scale_lambda;
   double phi;
 
-  QPoisParams(double scale_lambda_0_, double scale_lambda_, double phi_) :
+  QBinom(double scale_lambda_0_, double scale_lambda_, double phi_) :
     scale_lambda(scale_lambda_), 
     phi(phi_),
     sigma_scale_lambda(scale_lambda_),

@@ -1,27 +1,24 @@
-#ifndef QPOIS_SS_H
-#define QPOIS_SS_H
+#ifndef QBINOM_SS_H
+#define QBINOM_SS_H
 
 #include <RcppArmadillo.h>
 
-struct QPoisSuffStats {
-  double sum_Y;
-  double sum_Y_lambda_minus;
-  double sum_exp_lambda_minus;
+struct QBinomSuffStats {
+  double sum_Y_by_phi;
+  double sum_exp_lambda_minus_by_phi;
 
-  QPoisSuffStats() {
+  QBinomSuffStats() {
     Reset();
   }
 
   void Reset() {
-    sum_Y                = 0.0;
-    sum_Y_lambda_minus   = 0.0;
-    sum_exp_lambda_minus = 0.0;
+    sum_Y_by_phi                = 0.0;
+    sum_exp_lambda_minus_by_phi = 0.0;
   }
 
   void Increment(double y, double lambda_minus, double phi) {
-    sum_Y                += y / phi;
-    sum_Y_lambda_minus   += y * lambda_minus / phi;
-    sum_exp_lambda_minus += exp(lambda_minus) / phi;
+    sum_Y_by_phi                += y / phi;
+    sum_exp_lambda_minus_by_phi += exp(lambda_minus) / phi;
   }
 
 };

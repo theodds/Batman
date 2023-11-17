@@ -1,31 +1,31 @@
-#ifndef QPOIS_NODE_H
-#define QPOIS_NODE_H
+#ifndef QBinom_NODE_H
+#define QBinom_NODE_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
-#include "QPoisParams.h"
-#include "QPoisData.h"
-#include "QPoisSS.h"
+#include "QBinomParams.h"
+#include "QBinomData.h"
+#include "QBinomSS.h"
 
-struct QPoisNode : public Node<QPoisNode> {
+struct QBinomNode : public Node<QBinomNode> {
 
   double lambda;
-  const QPoisParams* pois_params;
-  QPoisSuffStats ss;
+  const QBinomParams* pois_params;
+  QBinomSuffStats ss;
 
- QPoisNode(TreeHypers* tree_hypers_, QPoisParams* pois_params_) :
-  Node<QPoisNode>(tree_hypers_), ss() {
+ QBinomNode(TreeHypers* tree_hypers_, QBinomParams* pois_params_) :
+  Node<QBinomNode>(tree_hypers_), ss() {
     lambda = 0.0;
     pois_params = pois_params_;
   }
 
- QPoisNode(QPoisNode* parent) : Node<QPoisNode>(parent), ss() {
+ QBinomNode(QBinomNode* parent) : Node<QBinomNode>(parent), ss() {
     lambda = 0.0;
     pois_params = parent->pois_params;
   }
 
-  void AddSuffStat(const QPoisData& data, int i, double phi);
-  void UpdateSuffStat(const QPoisData& data, double phi);
+  void AddSuffStat(const QBinomData& data, int i, double phi);
+  void UpdateSuffStat(const QBinomData& data, double phi);
 
   void ResetSuffStat() {
     ss.Reset();
@@ -36,12 +36,12 @@ struct QPoisNode : public Node<QPoisNode> {
   }
 };
 
-double PredictPois(QPoisNode* n, const arma::rowvec& x);
-arma::vec PredictPois(QPoisNode* tree, const arma::mat& X);
+double PredictPois(QBinomNode* n, const arma::rowvec& x);
+arma::vec PredictPois(QBinomNode* tree, const arma::mat& X);
 
-void BackFit(QPoisData& data, QPoisNode* tree);
-void Refit(QPoisData& data, QPoisNode* tree);
-double LogLT(QPoisNode* root, const QPoisData& data);
-void UpdateParams(QPoisNode* root, const QPoisData& data);
+void BackFit(QBinomData& data, QBinomNode* tree);
+void Refit(QBinomData& data, QBinomNode* tree);
+double LogLT(QBinomNode* root, const QBinomData& data);
+void UpdateParams(QBinomNode* root, const QBinomData& data);
 
 #endif
