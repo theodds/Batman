@@ -18,7 +18,7 @@ struct QBinomSuffStats {
 
   void Increment(double y, double rho, double lambda_minus, double phi) {
     sum_Y_by_phi                += y / phi;
-    sum_exp_lambda_minus_by_phi += rho * exp(lambda_minus) / phi;
+    sum_exp_lambda_minus_by_phi += rho * exp(lambda_minus);
   }
 
 };

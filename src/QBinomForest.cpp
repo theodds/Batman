@@ -60,6 +60,8 @@ List QBinomBart(const arma::mat& X,
                 double scale_lambda_0,
                 int num_burn, int num_thin, int num_save)
 {
+
+  // Rcout << "TreeHypers tree_hypers(probs);" << std::endl;
   TreeHypers tree_hypers(probs);
   QBinomParams pois_params(scale_lambda_0, scale_lambda, 1.0);
   QBinomForest forest(num_trees, &tree_hypers, &pois_params);
@@ -69,10 +71,12 @@ List QBinomBart(const arma::mat& X,
   umat counts = zeros<umat>(num_save, probs.n_cols);
   vec phi = zeros<vec>(num_save);
 
+  // Rcout << "for(int iter = 0; iter < num_burn; iter++);" << std::endl;
   for(int iter = 0; iter < num_burn; iter++) {
     IterateGibbs(forest.trees, data, pois_params, tree_hypers);
-    if(iter % 100 == 0) Rcout << "\rFinishing warmup iteration "
-                              << iter << "\t\t\t";
+    if(iter % 100 == 0)
+      Rcout << "\rFinishing warmup iteration " << iter << "\t\t\t";
+      // Rcout << data.rho << std::endl;
   }
 
   for(int iter = 0; iter < num_save; iter++) {
