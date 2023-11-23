@@ -1,9 +1,9 @@
-#include "QPoisForest.h"
+#include "QGammaForest.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X) {
+arma::vec PredictPois(std::vector<QGammaNode*>& forest, const arma::mat& X) {
   int N = forest.size();
   vec out = zeros<mat>(X.n_rows);
   for(int n = 0; n < N; n++) {
@@ -12,10 +12,9 @@ arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X) {
   return out;
 }
 
-void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
-                  const QPoisData& data)
+void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
+                  const QGammaData& data)
 {
-  // UpdateSigmaY(hypers, data);
   // UpdateSigmaMu(hypers, trees);
 
   // Create the Bayesian bootstrap vector
@@ -33,8 +32,8 @@ void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
   vec mu = zeros<vec>(N);
   vec Z = zeros<vec>(N);
   for(int i = 0; i < N; i++) {
-    mu(i) = exp(data.lambda_hat(i));
-    Z(i) = pow(data.Y(i) - mu(i), 2) / mu(i);
+    mu(i) = exp(-data.lambda_hat(i));
+    Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), 2);
   }
 
   // Update phi
@@ -45,7 +44,7 @@ void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
 }
 
 // [[Rcpp::export]]
-List QPoisBart(const arma::mat& X,
+List QGammaBart(const arma::mat& X,
               const arma::vec& Y,
               const arma::mat& X_test,
               const arma::sp_mat& probs,
@@ -55,9 +54,9 @@ List QPoisBart(const arma::mat& X,
               int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  QPoisParams pois_params(scale_lambda_0, scale_lambda, 1.0);
-  QPoisForest forest(num_trees, &tree_hypers, &pois_params);
-  QPoisData data(X,Y);
+  QGammaParams pois_params(scale_lambda_0, scale_lambda, 1.0);
+  QGammaForest forest(num_trees, &tree_hypers, &pois_params);
+  QGammaData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());
   mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
   umat counts = zeros<umat>(num_save, probs.n_cols);

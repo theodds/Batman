@@ -1,33 +1,33 @@
-#ifndef QPOIS_FOREST_H
-#define QPOIS_FOREST_H
+#ifndef QGAMMA_FOREST_H
+#define QGAMMA_FOREST_H
 
 #include <RcppArmadillo.h>
-#include "QPoisNode.h"
-#include "QPoisData.h"
+#include "QGammaNode.h"
+#include "QGammaData.h"
 #include "mcmc.h"
 
 
-struct QPoisForest {
-  std::vector<QPoisNode*> trees;
+struct QGammaForest {
+  std::vector<QGammaNode*> trees;
 
-  QPoisForest(int num_trees, TreeHypers* tree_hypers, QPoisParams* pois_params) {
+  QGammaForest(int num_trees, TreeHypers* tree_hypers, QGammaParams* pois_params) {
     trees.resize(0);
     for(int t = 0; t < num_trees; t++) {
-      QPoisNode* n = new QPoisNode(tree_hypers, pois_params);
+      QGammaNode* n = new QGammaNode(tree_hypers, pois_params);
       trees.push_back(n);
     }
   }
 
-  ~QPoisForest() {
+  ~QGammaForest() {
     for(int t = 0; t < trees.size(); t++)
       delete trees[t];
   }
 
 };
 
-arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X);
+arma::vec PredictPois(std::vector<QGammaNode*>& forest, const arma::mat& X);
 
-void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
-                  const QPoisData& data);
+void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
+                  const QGammaData& data);
 
 #endif
