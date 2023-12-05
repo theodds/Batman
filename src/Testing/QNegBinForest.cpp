@@ -1,9 +1,9 @@
-#include "QPoisForest.h"
+#include "QNBForest.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X) {
+arma::vec PredictPois(std::vector<QNBNode*>& forest, const arma::mat& X) {
   int N = forest.size();
   vec out = zeros<mat>(X.n_rows);
   for(int n = 0; n < N; n++) {
@@ -12,8 +12,8 @@ arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X) {
   return out;
 }
 
-void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
-                  const QPoisData& data)
+void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
+                  const QNBData& data)
 {
   // UpdateSigmaY(hypers, data);
   // UpdateSigmaMu(hypers, trees);
@@ -45,7 +45,7 @@ void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
 }
 
 // [[Rcpp::export]]
-List QPoisBart(const arma::mat& X,
+List QNBBart(const arma::mat& X,
               const arma::vec& Y,
               const arma::mat& X_test,
               const arma::sp_mat& probs,
@@ -55,9 +55,9 @@ List QPoisBart(const arma::mat& X,
               int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  QPoisParams pois_params(scale_lambda_0, scale_lambda, 1.0);
-  QPoisForest forest(num_trees, &tree_hypers, &pois_params);
-  QPoisData data(X,Y);
+  QNBParams pois_params(scale_lambda_0, scale_lambda, 1.0);
+  QNBForest forest(num_trees, &tree_hypers, &pois_params);
+  QNBData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());
   mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
   umat counts = zeros<umat>(num_save, probs.n_cols);

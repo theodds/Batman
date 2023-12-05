@@ -1,14 +1,14 @@
-#ifndef QPOIS_SS_H
-#define QPOIS_SS_H
+#ifndef QNB_SS_H
+#define QNB_SS_H
 
 #include <RcppArmadillo.h>
 
-struct QPoisSuffStats {
+struct QNBSuffStats {
   double sum_Y;
   double sum_Y_lambda_minus;
   double sum_exp_lambda_minus;
 
-  QPoisSuffStats() {
+  QNBSuffStats() {
     Reset();
   }
 

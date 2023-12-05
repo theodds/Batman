@@ -1,31 +1,31 @@
-#ifndef QPOIS_NODE_H
-#define QPOIS_NODE_H
+#ifndef QNB_NODE_H
+#define QNB_NODE_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
-#include "QPoisParams.h"
-#include "QPoisData.h"
-#include "QPoisSS.h"
+#include "QNBParams.h"
+#include "QNBData.h"
+#include "QNBSS.h"
 
-struct QPoisNode : public Node<QPoisNode> {
+struct QNBNode : public Node<QNBNode> {
 
   double lambda;
-  const QPoisParams* pois_params;
-  QPoisSuffStats ss;
+  const QNBParams* pois_params;
+  QNBSuffStats ss;
 
- QPoisNode(TreeHypers* tree_hypers_, QPoisParams* pois_params_) :
-  Node<QPoisNode>(tree_hypers_), ss() {
+ QNBNode(TreeHypers* tree_hypers_, QNBParams* pois_params_) :
+  Node<QNBNode>(tree_hypers_), ss() {
     lambda = 0.0;
     pois_params = pois_params_;
   }
 
- QPoisNode(QPoisNode* parent) : Node<QPoisNode>(parent), ss() {
+ QNBNode(QNBNode* parent) : Node<QNBNode>(parent), ss() {
     lambda = 0.0;
     pois_params = parent->pois_params;
   }
 
-  void AddSuffStat(const QPoisData& data, int i, double phi);
-  void UpdateSuffStat(const QPoisData& data, double phi);
+  void AddSuffStat(const QNBData& data, int i, double phi);
+  void UpdateSuffStat(const QNBData& data, double phi);
 
   void ResetSuffStat() {
     ss.Reset();
@@ -36,12 +36,12 @@ struct QPoisNode : public Node<QPoisNode> {
   }
 };
 
-double PredictPois(QPoisNode* n, const arma::rowvec& x);
-arma::vec PredictPois(QPoisNode* tree, const arma::mat& X);
+double PredictPois(QNBNode* n, const arma::rowvec& x);
+arma::vec PredictPois(QNBNode* tree, const arma::mat& X);
 
-void BackFit(QPoisData& data, QPoisNode* tree);
-void Refit(QPoisData& data, QPoisNode* tree);
-double LogLT(QPoisNode* root, const QPoisData& data);
-void UpdateParams(QPoisNode* root, const QPoisData& data);
+void BackFit(QNBData& data, QNBNode* tree);
+void Refit(QNBData& data, QNBNode* tree);
+double LogLT(QNBNode* root, const QNBData& data);
+void UpdateParams(QNBNode* root, const QNBData& data);
 
 #endif

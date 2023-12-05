@@ -1,9 +1,9 @@
-#include "QPoisNode.h"
+#include "QNBNode.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-void QPoisNode::AddSuffStat(const QPoisData& data, int i, double phi) {
+void QNBNode::AddSuffStat(const QNBData& data, int i, double phi) {
   ss.Increment(data.Y(i), data.lambda_hat(i), phi);
   if(!is_leaf) {
     double x = data.X(i,var);
@@ -15,7 +15,7 @@ void QPoisNode::AddSuffStat(const QPoisData& data, int i, double phi) {
   }
 }
 
-void QPoisNode::UpdateSuffStat(const QPoisData& data, double phi) {
+void QNBNode::UpdateSuffStat(const QNBData& data, double phi) {
   ResetSuffStat();
   int N = data.X.n_rows;
   for(int i = 0; i < N; i++) {
@@ -23,7 +23,7 @@ void QPoisNode::UpdateSuffStat(const QPoisData& data, double phi) {
   }
 }
 
-double PredictPois(QPoisNode* n, const rowvec& x) {
+double PredictPois(QNBNode* n, const rowvec& x) {
   if(n->is_leaf) {
     return n->lambda;
   }
@@ -35,7 +35,7 @@ double PredictPois(QPoisNode* n, const rowvec& x) {
   }
 }
 
-arma::vec PredictPois(QPoisNode* tree, const arma::mat& X) {
+arma::vec PredictPois(QNBNode* tree, const arma::mat& X) {
   int N = X.n_rows;
   vec out = zeros<vec>(N);
   for(int i = 0; i < N; i++) {
@@ -45,19 +45,19 @@ arma::vec PredictPois(QPoisNode* tree, const arma::mat& X) {
   return out;
 }
 
-void BackFit(QPoisData& data, QPoisNode* tree) {
+void BackFit(QNBData& data, QNBNode* tree) {
   vec lambda = PredictPois(tree, data.X);
   data.lambda_hat = data.lambda_hat - lambda;
 }
 
-void Refit(QPoisData& data, QPoisNode* tree) {
+void Refit(QNBData& data, QNBNode* tree) {
   vec lambda = PredictPois(tree, data.X);
   data.lambda_hat = data.lambda_hat + lambda;
 }
 
-double LogLT(QPoisNode* root, const QPoisData& data) {
+double LogLT(QNBNode* root, const QNBData& data) {
   root->UpdateSuffStat(data, root->pois_params->get_phi());
-  std::vector<QPoisNode*> leafs = leaves(root);
+  std::vector<QNBNode*> leafs = leaves(root);
 
   double out = 0.0;
   int num_leaves = leafs.size();
@@ -76,9 +76,9 @@ double LogLT(QPoisNode* root, const QPoisData& data) {
   return out;
 }
 
-void UpdateParams(QPoisNode* root, const QPoisData& data) {
+void UpdateParams(QNBNode* root, const QNBData& data) {
   root->UpdateSuffStat(data, root->pois_params->get_phi());
-  std::vector<QPoisNode*> leafs = leaves(root);
+  std::vector<QNBNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
   for(int i = 0; i < num_leaves; i++) {
     double sum_Y = leafs[i]->ss.sum_Y;

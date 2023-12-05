@@ -1,18 +1,20 @@
-#ifndef QPOIS_PARAMS_H
-#define QPOIS_PARAMS_H
+#ifndef QNB_PARAMS_H
+#define QNB_PARAMS_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
 
-struct QPoisParams {
+struct QNBParams {
 
   double scale_lambda_0;
   double sigma_scale_lambda;
   double phi;
+  double k;
 
-  QPoisParams(double scale_lambda_0_, double scale_lambda_, double phi_) :
-    scale_lambda(scale_lambda_), 
+QNBParams(double scale_lambda_0_, double scale_lambda_, double phi_, double k_) :
+  scale_lambda(scale_lambda_), 
     phi(phi_),
+    k(k_),
     sigma_scale_lambda(scale_lambda_),
     scale_lambda_0(scale_lambda_0_) {
     scale_lambda_to_ab();
