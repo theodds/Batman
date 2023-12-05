@@ -8,7 +8,7 @@ library(tidyverse)
 set.seed(9999)
 
 P <- 10
-N <- 250
+N <- 2500
 num_tree <- 50
 
 probs <- Matrix::Matrix(diag(P))
@@ -20,7 +20,7 @@ sim_fried_gamma <- function(N, P, phi = 0.5) {
     10 * sin(pi * x[,1] * x[,2]) + 20 * (x[,3]-0.5)^2 + 10 * x[,4] + 5 * x[,5]
   
   phi <- 0.5
-  mu <- f(X)
+  mu <- f(X) / 10
   alpha <- 1 / phi
   beta <- alpha / mu
   
@@ -46,7 +46,17 @@ fitted_qgam <-
     50,
     scale_lambda_0 = 1,
     scale_lambda = 1 / sqrt(50),
-    num_burn = 10,
+    num_burn = 3000,
     num_thin = 1,
-    num_save = 10
+    num_save = 3000
   )
+
+## Checking output ----
+
+par(mfrow = c(2,2))
+plot(colMeans(exp(-fitted_qgam$lambda)), train_data$mu)
+abline(a=0, b=1)
+plot(fitted_qgam$phi, type = 'l')
+hist(fitted_qgam$phi)
+plot(colMeans(fitted_qgam$counts > 0), ylim = c(0,1))
+
