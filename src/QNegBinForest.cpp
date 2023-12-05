@@ -1,4 +1,4 @@
-#include "QNBForest.h"
+#include "QNegBinForest.h"
 
 using namespace arma;
 using namespace Rcpp;

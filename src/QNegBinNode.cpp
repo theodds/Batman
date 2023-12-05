@@ -1,4 +1,4 @@
-#include "QNBNode.h"
+#include "QNegBinNode.h"
 
 using namespace arma;
 using namespace Rcpp;

@@ -81,6 +81,7 @@ abs_errors_db <- abs(fitted_dbart$yhat.test.mean - train_data$mu)^2
 plot(density(abs_errors))
 lines(density(abs_errors_db))
 plot(fitted_qgam$counts[,1])
+plot(fitted_qgam$counts[,2])
 
 mean(abs_errors) / mean(abs_errors_db)
 

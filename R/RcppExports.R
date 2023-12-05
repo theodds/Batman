@@ -33,6 +33,10 @@ QGammaBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambd
     .Call(`_Batman_QGammaBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
+QNBBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
+    .Call(`_Batman_QNBBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
+}
+
 QPoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
     .Call(`_Batman_QPoisBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }

@@ -3,9 +3,9 @@
 
 #include <RcppArmadillo.h>
 #include "Node.h"
-#include "QNBParams.h"
-#include "QNBData.h"
-#include "QNBSS.h"
+#include "QNegBinParams.h"
+#include "QNegBinData.h"
+#include "QNegBinSS.h"
 
 struct QNBNode : public Node<QNBNode> {
 

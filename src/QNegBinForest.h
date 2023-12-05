@@ -2,8 +2,8 @@
 #define QNB_FOREST_H
 
 #include <RcppArmadillo.h>
-#include "QNBNode.h"
-#include "QNBData.h"
+#include "QNegBinNode.h"
+#include "QNegBinData.h"
 #include "mcmc.h"
 
 
