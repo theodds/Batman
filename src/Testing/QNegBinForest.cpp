@@ -4,10 +4,13 @@ using namespace arma;
 using namespace Rcpp;
 
 void V_eta(double mu, double eta, double& V, double& Vp, double& Vpp) {
-  double l = log(mu)
-  V = pow(mu, eta);
-  Vp = l * V;
-  Vpp = l * Vp;
+  // double l = log(mu)
+  // V = pow(mu, eta);
+  // Vp = l * V;
+  // Vpp = l * Vp;
+  V = mu + eta * mu * mu;
+  Vp = mu * mu;
+  Vpp = 0.;
 }
 
 double R_eta(double eta, double phi, const arma::vec& mu_vec,
@@ -35,11 +38,25 @@ void newton_rhapson(double& eta, double& phi,
                     const QNBData& data) {
   
   int NUM_NEWTON = 10;
+  int N = omega.n_elem;
   double R, Rp, Rpp;
-  for(int i = 0; i < NUM_NEWTON; i++) {
-    
-  }
+  double V, Vp, Vpp;
+  arma::vec mu = exp(data.lambda_hat);
+  arma::vec Z = zeros<vec>(N);
   
+  for(int k = 0; k < NUM_NEWTON; k++) {
+
+    // Step 1: Coordinate Ascent on phi
+    for(int i = 0; i < N; i++) {
+      V_eta(mu(i), eta, V, Vp, Vpp);
+      Z(i) = pow(data.Y(i) - mu(i), 2) / V;
+    }
+    phi = sum(Z % omega);
+
+    // Step 2: Newton Step on eta
+    R_eta(eta, phi, mu, omega, data, R, Rp, Rpp);
+    eta = eta - Rp / Rpp;
+  }
 }
 
 arma::vec PredictPois(std::vector<QNBNode*>& forest, const arma::mat& X) {
