@@ -24,6 +24,7 @@ QNBParams(double scale_lambda_0_, double scale_lambda_, double phi_, double k_) 
   double get_beta() const {return beta;}
   double get_scale_lambda() const {return scale_lambda;}
   double get_phi() const {return phi;}
+  double get_k() const {return k;}
   void set_scale_lambda(double x) {
     scale_lambda = x;
     scale_lambda_to_ab();
