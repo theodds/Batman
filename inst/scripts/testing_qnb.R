@@ -6,14 +6,14 @@ library(zeallot)
 library(Matrix)
 library(tidyverse)
 
+rmse <- function(x,y) sqrt(mean((x-y)^2))
+
+## Generate quasi-Poisson Data just to test; expect k in this case to be close to 0 (hopefully not negative) ----
+
 P <- 10
 N <- 2000
 sigma <- 20
 num_tree <- 50
-
-rmse <- function(x,y) sqrt(mean((x-y)^2))
-
-## Generate quasi-Poisson Data just to test; expect k in this case to be close to 0 (hopefully not negative) ----
 
 sim_fried_pois <- function(n,p,sigma) {
   f <- function(x)
@@ -28,6 +28,23 @@ sim_fried_pois <- function(n,p,sigma) {
 
 c(X,Y,lambda) %<-% sim_fried_pois(N,P,sigma)
 probs <- diag(P); probs <- Matrix(probs, sparse = TRUE)
+
+## Fit Quasi-NB ----
+
+qnb_fit <- QNBBart(
+  X = X,
+  Y = Y,
+  X_test = ,
+  probs = probs,
+  num_trees = num_trees,
+  scale_lambda = 1 / sqrt(num_trees),
+  scale_lambda_0 = 1,
+  num_burn = 10,
+  num_thin = 1,
+  num_save = 10
+)
+
+## Fit Quasi-Poisson ----
 
 system.time({
   out <- QPoisBart(X, Y, X_test = X, probs = probs, num_trees = num_tree, scale_lambda = 1, 
