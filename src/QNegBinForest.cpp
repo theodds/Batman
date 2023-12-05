@@ -13,7 +13,7 @@ void V_eta(double mu, double eta, double& V, double& Vp, double& Vpp) {
   Vpp = 0.;
 }
 
-double R_eta(double eta, double phi, const arma::vec& mu_vec,
+void R_eta(double eta, double phi, const arma::vec& mu_vec,
              const arma::vec& omega, const QNBData& data,
              double& R, double& Rp, double& Rpp) {
   double V, Vp, Vpp;
@@ -69,7 +69,7 @@ arma::vec PredictPois(std::vector<QNBNode*>& forest, const arma::mat& X) {
 }
 
 void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
-                  const QNBData& data)
+                  QNBData& data)
 {
 
   // UPDATE THIS!!!
@@ -94,10 +94,11 @@ void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
   hypers.k = k;
 
   // Update xi
+  vec mu = exp(data.lambda_hat);
   for(int i = 0; i < N; i++) {
     double a = (k + data.Y(i)) / hypers.phi;
     double b = (k + mu(i)) / hypers.phi;
-    xi(i) = R::rgamma(a, 1/b);
+    data.xi(i) = R::rgamma(a, 1/b);
   }
 }
 
