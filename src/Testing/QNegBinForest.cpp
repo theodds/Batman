@@ -15,6 +15,8 @@ arma::vec PredictPois(std::vector<QNBNode*>& forest, const arma::mat& X) {
 void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
                   const QNBData& data)
 {
+
+  // UPDATE THIS!!!
   // UpdateSigmaY(hypers, data);
   // UpdateSigmaMu(hypers, trees);
 
@@ -42,6 +44,13 @@ void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
   // double phi_hat = sum(Z) / N;
   // hypers.phi = R::rgamma(0.5 * N, 2. * phi_hat / N);
 
+  // Update xi
+  double k = hypers.k;
+  for(int i = 0; i < N; i++) {
+    double a = (k + data.Y(i)) / hypers.phi;
+    double b = (k + mu(i)) / hypers.phi;
+    xi(i) = R::rgamma(a, 1/b);
+  }
 }
 
 // [[Rcpp::export]]
