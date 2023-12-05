@@ -3,6 +3,45 @@
 using namespace arma;
 using namespace Rcpp;
 
+void V_eta(double mu, double eta, double& V, double& Vp, double& Vpp) {
+  double l = log(mu)
+  V = pow(mu, eta);
+  Vp = l * V;
+  Vpp = l * Vp;
+}
+
+double R_eta(double eta, double phi, const arma::vec& mu_vec,
+             const arma::vec& omega, const QNBData& data,
+             double& R, double& Rp, double& Rpp) {
+  double V, Vp, Vpp;
+  int N = omega.n_elem;
+  R = 0.;
+  Rp = 0.;
+  Rpp = 0.;
+
+  for(int i = 0; i < N; i++) {
+    double mu = mu_vec(i);
+    V_eta(mu, eta, V, Vp, Vpp);
+    double Z = 0.5 * pow(data.Y(i) - mu, 2) / V / phi;
+    R += omega(i) * (-0.5 * log(phi * V) - Z);
+    Rp += omega(i) * (-0.5 / V + Z / V) * Vp;
+    Rpp += omega(i) * (Vpp * (-0.5 / V + Z / V)
+                       + Vp * Vp * (0.5 / V / V - 2 * Z / V / V));
+  }
+}
+
+void newton_rhapson(double& eta, double& phi,
+                    const arma::vec& omega,
+                    const QNBData& data) {
+  
+  int NUM_NEWTON = 10;
+  double R, Rp, Rpp;
+  for(int i = 0; i < NUM_NEWTON; i++) {
+    
+  }
+  
+}
+
 arma::vec PredictPois(std::vector<QNBNode*>& forest, const arma::mat& X) {
   int N = forest.size();
   vec out = zeros<mat>(X.n_rows);
