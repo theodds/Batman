@@ -18,10 +18,9 @@ struct QNBSuffStats {
     sum_exp_lambda_minus = 0.0;
   }
 
-  void Increment(double y, double lambda_minus, double phi) {
+  void Increment(double y, double lambda_minus, double phi, double xi) {
     sum_Y                += y / phi;
-    sum_Y_lambda_minus   += y * lambda_minus / phi;
-    sum_exp_lambda_minus += exp(lambda_minus) / phi;
+    sum_exp_lambda_minus += xi * exp(lambda_minus) / phi;
   }
 
 };

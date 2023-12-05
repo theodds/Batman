@@ -4,7 +4,7 @@ using namespace arma;
 using namespace Rcpp;
 
 void QNBNode::AddSuffStat(const QNBData& data, int i, double phi) {
-  ss.Increment(data.Y(i), data.lambda_hat(i), phi);
+  ss.Increment(data.Y(i), data.lambda_hat(i), phi, data.xi(i));
   if(!is_leaf) {
     double x = data.X(i,var);
     if(x <= val) {

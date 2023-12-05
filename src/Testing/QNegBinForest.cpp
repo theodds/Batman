@@ -101,8 +101,6 @@ void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
   }
 }
 
-/****************************************/
-
 // [[Rcpp::export]]
 List QNBBart(const arma::mat& X,
               const arma::vec& Y,
