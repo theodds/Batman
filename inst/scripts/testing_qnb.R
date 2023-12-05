@@ -34,15 +34,17 @@ probs <- diag(P); probs <- Matrix(probs, sparse = TRUE)
 qnb_fit <- QNBBart(
   X = X,
   Y = Y,
-  X_test = ,
+  X_test = X,
   probs = probs,
-  num_trees = num_trees,
-  scale_lambda = 1 / sqrt(num_trees),
+  num_trees = num_tree,
+  scale_lambda = 1 / sqrt(num_tree),
   scale_lambda_0 = 1,
-  num_burn = 10,
+  num_burn = 0,
   num_thin = 1,
-  num_save = 10
+  num_save = 1000
 )
+
+plot(qnb_fit$phi)
 
 ## Fit Quasi-Poisson ----
 

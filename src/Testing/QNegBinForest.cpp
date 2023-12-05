@@ -1,4 +1,4 @@
-#include "QNegBinForest.h"
+#include "QNBForest.h"
 
 using namespace arma;
 using namespace Rcpp;
@@ -8,12 +8,12 @@ void V_eta(double mu, double eta, double& V, double& Vp, double& Vpp) {
   // V = pow(mu, eta);
   // Vp = l * V;
   // Vpp = l * Vp;
-  V = mu + mu * mu / eta;
-  Vp = - mu * mu * pow(eta, -2);
-  Vpp = 2. * mu * mu * pow(eta, -3);
+  V = mu + eta * mu * mu;
+  Vp = mu * mu;
+  Vpp = 0.;
 }
 
-void R_eta(double eta, double phi, const arma::vec& mu_vec,
+double R_eta(double eta, double phi, const arma::vec& mu_vec,
              const arma::vec& omega, const QNBData& data,
              double& R, double& Rp, double& Rpp) {
   double V, Vp, Vpp;
@@ -56,7 +56,6 @@ void newton_rhapson(double& eta, double& phi,
     // Step 2: Newton Step on eta
     R_eta(eta, phi, mu, omega, data, R, Rp, Rpp);
     eta = eta - Rp / Rpp;
-    eta = eta < 0. ? 0. : eta;
   }
 }
 
@@ -70,14 +69,13 @@ arma::vec PredictPois(std::vector<QNBNode*>& forest, const arma::mat& X) {
 }
 
 void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
-                  QNBData& data)
+                  const QNBData& data)
 {
 
   // UPDATE THIS!!!
   // UpdateSigmaMu(hypers, trees);
 
   // Create the Bayesian bootstrap vector
-  // Rcout << "Updating Hypers" << std::endl;
   int N = data.X.n_rows;
   vec omega = zeros<vec>(N);
   for(int i = 0; i < N; i++) {
@@ -91,34 +89,30 @@ void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
   // Update the phi and eta by coordinate ascent/Newton's method
   double phi = hypers.phi;
   double k = hypers.k;
-  bool do_newton = false;
-  if(do_newton) newton_rhapson(k, phi, omega, data);
+  newton_rhapson(k, phi, omega, data);
   hypers.phi = phi;
   hypers.k = k;
-  // Rcout << "k = " << k << std::endl;
 
   // Update xi
-  vec mu = exp(data.lambda_hat);
   for(int i = 0; i < N; i++) {
     double a = (k + data.Y(i)) / hypers.phi;
     double b = (k + mu(i)) / hypers.phi;
-    data.xi(i) = R::rgamma(a, 1/b);
+    xi(i) = R::rgamma(a, 1/b);
   }
-  // Rcout << "Finish" << std::endl;
 }
 
 // [[Rcpp::export]]
 List QNBBart(const arma::mat& X,
-             const arma::vec& Y,
-             const arma::mat& X_test,
-             const arma::sp_mat& probs,
-             int num_trees,
-             double scale_lambda,
-             double scale_lambda_0,
-             int num_burn, int num_thin, int num_save)
+              const arma::vec& Y,
+              const arma::mat& X_test,
+              const arma::sp_mat& probs,
+              int num_trees,
+              double scale_lambda,
+              double scale_lambda_0,
+              int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  QNBParams pois_params(scale_lambda_0, scale_lambda, 1.0, 0.01);
+  QNBParams pois_params(scale_lambda_0, scale_lambda, 1.0, 1000.0);
   QNBForest forest(num_trees, &tree_hypers, &pois_params);
   QNBData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());
