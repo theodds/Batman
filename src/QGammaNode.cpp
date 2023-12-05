@@ -63,11 +63,11 @@ double LogLT(QGammaNode* root, const QGammaData& data) {
   int num_leaves = leafs.size();
 
   for(int i = 0; i < num_leaves; i++) {
-    double sum_eta = leafs[i]->ss.sum_lambda_minus;
+    double sum_1_by_phi = leafs[i]->ss.sum_1_by_phi;
     double sum_y_exp_eta = leafs[i]->ss.sum_exp_lambda_minus_y;
     double alpha = root->pois_params->get_alpha();
     double beta = root->pois_params->get_beta();
-    double alpha_up = alpha + sum_eta;
+    double alpha_up = alpha + sum_1_by_phi;
     double beta_up = beta + sum_y_exp_eta;
 
     out += beta * log(alpha) - R::lgammafn(alpha);
@@ -81,11 +81,11 @@ void UpdateParams(QGammaNode* root, const QGammaData& data) {
   std::vector<QGammaNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
   for(int i = 0; i < num_leaves; i++) {
-    double sum_eta = leafs[i]->ss.sum_lambda_minus;
+    double sum_1_by_phi = leafs[i]->ss.sum_1_by_phi;
     double sum_y_exp_eta = leafs[i]->ss.sum_exp_lambda_minus_y;
     double alpha = root->pois_params->get_alpha();
     double beta = root->pois_params->get_beta();
-    double alpha_up = alpha + sum_eta;
+    double alpha_up = alpha + sum_1_by_phi;
     double beta_up = beta + sum_y_exp_eta;
 
     leafs[i]->lambda = rlgam(alpha_up) - log(beta_up);

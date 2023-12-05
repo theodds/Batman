@@ -38,6 +38,7 @@ void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
 
   // Update phi
   hypers.phi = sum(Z % omega);
+  Rcout << "hypers.phi = sum(Z % omega);" << "    " << hypers.phi << std::endl;
   // double phi_hat = sum(Z) / N;
   // hypers.phi = R::rgamma(0.5 * N, 2. * phi_hat / N);
 

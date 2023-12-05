@@ -4,7 +4,7 @@
 #include <RcppArmadillo.h>
 
 struct QGammaSuffStats {
-  double sum_lambda_minus;
+  double sum_1_by_phi;
   double sum_exp_lambda_minus_y;
 
   QGammaSuffStats() {
@@ -12,12 +12,12 @@ struct QGammaSuffStats {
   }
 
   void Reset() {
-    sum_lambda_minus = 0.;
+    sum_1_by_phi = 0.;
     sum_exp_lambda_minus_y = 0.;
   }
 
   void Increment(double y, double lambda_minus, double phi) {
-    sum_lambda_minus        += lambda_minus / phi;
+    sum_1_by_phi            += 1. / phi;
     sum_exp_lambda_minus_y  += exp(lambda_minus) * y / phi;
   }
 

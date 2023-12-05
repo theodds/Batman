@@ -11,6 +11,8 @@ P <- 10
 N <- 250
 num_tree <- 50
 
+probs <- Matrix::Matrix(diag(P))
+
 sim_fried_gamma <- function(N, P, phi = 0.5) {
   X <- matrix(runif(N*P), nrow = N)
   
@@ -30,4 +32,21 @@ sim_fried_gamma <- function(N, P, phi = 0.5) {
 train_data <- sim_fried_gamma(N, P)
 qplot(mu, Y, data = train_data)
 
+X <- train_data %>% select(-Y, -mu) %>% as.matrix()
+Y <- train_data %>% pull(Y)
+
 ## Fit Model ----
+
+fitted_qgam <-
+  QGammaBart(
+    X,
+    Y,
+    X,
+    probs,
+    50,
+    scale_lambda_0 = 1,
+    scale_lambda = 1 / sqrt(50),
+    num_burn = 10,
+    num_thin = 1,
+    num_save = 10
+  )
