@@ -8,9 +8,9 @@ void V_eta(double mu, double eta, double& V, double& Vp, double& Vpp) {
   // V = pow(mu, eta);
   // Vp = l * V;
   // Vpp = l * Vp;
-  V = mu + mu * mu / eta;
-  Vp = - mu * mu * pow(eta, -2);
-  Vpp = 2. * mu * mu * pow(eta, -3);
+  V = mu + mu * mu * exp(eta);
+  Vp = mu * mu * exp(eta);
+  Vpp = Vp;
 }
 
 void R_eta(double eta, double phi, const arma::vec& mu_vec,
@@ -38,6 +38,7 @@ void newton_rhapson(double& eta, double& phi,
                     const QNBData& data) {
   
   int NUM_NEWTON = 10;
+  bool DO_NEWTON = true;
   int N = omega.n_elem;
   double R, Rp, Rpp;
   double V, Vp, Vpp;
@@ -53,10 +54,10 @@ void newton_rhapson(double& eta, double& phi,
     }
     phi = sum(Z % omega);
 
+    if(!DO_NEWTON) break;
     // Step 2: Newton Step on eta
     R_eta(eta, phi, mu, omega, data, R, Rp, Rpp);
     eta = eta - Rp / Rpp;
-    eta = eta < 0. ? 0. : eta;
   }
 }
 
@@ -90,10 +91,11 @@ void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
 
   // Update the phi and eta by coordinate ascent/Newton's method
   double phi = hypers.phi;
-  double k = hypers.k;
-  bool do_newton = false;
-  if(do_newton) newton_rhapson(k, phi, omega, data);
+  double eta = -log(hypers.k);
+  newton_rhapson(eta, phi, omega, data);
   hypers.phi = phi;
+  double k = exp(-eta);
+  if(k > 1E10) k = 1E10;
   hypers.k = k;
   // Rcout << "k = " << k << std::endl;
 
@@ -118,7 +120,7 @@ List QNBBart(const arma::mat& X,
              int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  QNBParams pois_params(scale_lambda_0, scale_lambda, 1.0, 0.01);
+  QNBParams pois_params(scale_lambda_0, scale_lambda, 1.0, 1E10);
   QNBForest forest(num_trees, &tree_hypers, &pois_params);
   QNBData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());

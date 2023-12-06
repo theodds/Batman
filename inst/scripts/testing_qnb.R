@@ -26,7 +26,21 @@ sim_fried_pois <- function(n,p,sigma) {
   return(list(X = X, Y = Y, lambda = lambda))
 }
 
-c(X,Y,lambda) %<-% sim_fried_pois(N,P,sigma)
+sim_fried_qnb <- function(n,p,sigma) {
+  f <- function(x)
+    10 * sin(pi * x[,1] * x[,2]) + 20 * (x[,3]-0.5)^2 + 10 * x[,4] + 5 * x[,5]
+  
+  X <- matrix(runif(n*p), nrow = n)
+  lambda <- sigma * f(X)
+  Y1 <- 20 * rpois(n = n, lambda = lambda / 20)
+  Y2 <- rnbinom(n = n, size = 2, mu = lambda)
+  Y <- ifelse(runif(n) < 0.5, Y1, Y2)
+  
+  return(list(X = X, Y = Y, lambda = lambda))
+}
+
+# c(X,Y,lambda) %<-% sim_fried_pois(N,P,sigma)
+c(X,Y,lambda) %<-% sim_fried_qnb(N,P,sigma)
 probs <- diag(P); probs <- Matrix(probs, sparse = TRUE)
 
 ## Fit Quasi-NB ----
@@ -39,12 +53,16 @@ qnb_fit <- QNBBart(
   num_trees = num_tree,
   scale_lambda = 1 / sqrt(num_tree),
   scale_lambda_0 = 1,
-  num_burn = 0,
+  num_burn = 1000,
   num_thin = 1,
   num_save = 1000
 )
 
+par(mfrow = c(1,3))
 plot(qnb_fit$phi)
+plot(qnb_fit$k)
+plot(colMeans(qnb_fit$lambda), log(lambda))
+abline(a=0,b=1)
 
 ## Fit Quasi-Poisson ----
 
@@ -54,13 +72,7 @@ system.time({
                    num_burn = 2000, num_thin = 1, num_save = 2000)  
 })
 
-system.time({
-  out_pos <- PoisBart(X, Y, X_test = X, probs = probs, num_trees = num_tree, scale_lambda = 1, 
-                      scale_lambda_0 = 1 / sqrt(num_tree),
-                      num_burn = 2000, num_thin = 1, num_save = 2000)  
-})
-
-plot(log(lambda), colMeans(out$lambda))
+plot(colMeans(out$lambda), log(lambda))
 abline(a=0,b=1)
 
 plot(log(lambda), colMeans(out_pos$lambda))
