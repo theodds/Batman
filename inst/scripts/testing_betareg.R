@@ -31,3 +31,17 @@ plot(density(Y))
 plot(\(x) dbeta(x, rho * mu[1], rho * (1 - mu[1])))
 
 ## Fit Model ----
+
+fitted_qbeta <- QBinomBart(
+  X = X,
+  Y = Y,
+  n = rep(1, N),
+  X_test = X,
+  probs = Matrix::Matrix(diag(P)),
+  num_trees = 50,
+  scale_lambda = 1 / sqrt(50),
+  scale_lambda_0 = 1,
+  num_burn = 1000,
+  num_thin = 1,
+  num_save = 1000
+)
