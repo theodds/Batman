@@ -45,3 +45,16 @@ fitted_qbeta <- QBinomBart(
   num_thin = 1,
   num_save = 1000
 )
+
+## Check results ----
+
+par(mfrow = c(1,3))
+plot(fitted_qbeta$phi, type = 'l') 
+abline(h = phi_0, col=3,lwd=4,lty=2)
+hist(fitted_qbeta$phi)
+abline(v = phi_0, col=3,lwd=4,lty=2)
+plot(plogis(colMeans(fitted_qbeta$lambda)), mu)
+abline(a=0,b=1,col=3,lwd=2,lty=2)
+
+print(ci(fitted_qbeta$phi))
+print(c(phi_0))
