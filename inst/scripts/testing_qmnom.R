@@ -46,8 +46,8 @@ mu4 <- mu[-4]
 y1  <- y[-1] - mu1
 y4  <- y[-4] - mu4
 
-sum(y1^2 / mu1) + sum(y1)^2 / (1 - sum(mu1))
-sum(y4^2 / mu4) + sum(y4)^2 / (1 - sum(mu4))
+sum(y1^2 / mu1) + sum(y1)^2 / (mu[1])
+sum(y4^2 / mu4) + sum(y4)^2 / (mu[4])
 
 Sigma  <- diag(mu) - mu %*% t(mu)
 Sigma1 <- diag(mu1) - mu1 %*% t(mu1)
