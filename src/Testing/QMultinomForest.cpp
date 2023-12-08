@@ -57,26 +57,29 @@ void UpdateHypers(QMultinomParams& hypers, std::vector<QMultinomNode*>& trees,
     omega(i) = omega(i) / omega_sum;
   }
 
-  // Compute phi_hat
-  vec phi_hat = zeros<vec>(N);
+  // Update phi
+  double phi = 0.
   for(int i = 0; i < N; i++) {
-    phi_hat(i) = data.n(i) * fast_YtVinvY(data.Y.row(i), mu.row(i)) / (K - 1);
+    for(int k = 0; k < K; k++) {
+      phi += omega(i) * data.n(i) * pow(data.Y(i,k) - mu(i,k), 2) / mu(i,k);
+    }
   }
+  phi = phi / (K - 1);
   
   // Update phi
-  hypers.phi = sum(phi_hat % omega);
+  hypers.phi = phi;
 }
 
 // [[Rcpp::export]]
 List QMultinomBart(const arma::mat& X,
-                const arma::mat& Y,
-                const arma::vec& n,
-                const arma::mat& X_test,
-                const arma::sp_mat& probs,
-                int num_trees,
-                double scale_lambda,
-                double scale_lambda_0,
-                int num_burn, int num_thin, int num_save)
+                   const arma::mat& Y,
+                   const arma::vec& n,
+                   const arma::mat& X_test,
+                   const arma::sp_mat& probs,
+                   int num_trees,
+                   double scale_lambda,
+                   double scale_lambda_0,
+                   int num_burn, int num_thin, int num_save)
 {
 
   int N = Y.n_rows; 

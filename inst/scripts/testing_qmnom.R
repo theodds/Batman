@@ -3,6 +3,7 @@
 library(tidyverse)
 library(Batman)
 library(mvtnorm)
+library(truncdist)
 
 ## Testing Woodburry ----
 
@@ -60,3 +61,51 @@ mvtnorm::dmvnorm(y, sigma = Sigma)
 ## What is going on? The maximum likelihood estimator of phi should not depend
 ## on which point I drop out? Is the issue that I'm not subtracting? I guess
 ## probably this is the issue
+
+## Testing an alternate form ----
+
+sum((y - mu)^2 / (mu * (1 - mu)))
+sum((y - mu)^2 / mu)
+
+## What about stationary distribution? ----
+
+## Let's look at a simple setting of the Quasi-Poisson under the
+## pseudo-likelihood approach. Under this, we have lambda ~ Gam(S/phi, N/phi)
+## and phi ~ Gam(N/2, SSE/2). What happens to the chain?
+
+lambda_0 <- 2
+N        <- 5
+phi_0    <- 2
+Y        <- phi_0 * rpois(n = N, lambda = lambda_0 / phi_0)
+
+num_warmup  <- 0
+num_save    <- 5000
+num_iter    <- num_save + num_warmup
+lambda      <- 2
+phi         <- 2
+lambda_save <- numeric(num_save)
+phi_save    <- numeric(num_save)
+idx         <- 1
+
+for(i in 1:num_iter) {
+  phi <- 1/rgamma(1, N/2, sum((Y - lambda)^2) / 2 / lambda)
+  while(phi > 5) {
+    phi <- 1/rgamma(1, N/2, sum((Y - lambda)^2) / 2 / lambda)
+  }
+  lambda <- rgamma(1, sum(Y) / phi, N / phi)
+
+  if(i > num_warmup) {
+    lambda_save[idx] <- lambda
+    phi_save[idx] <- phi
+    idx <- idx + 1
+  }
+}
+
+par(mfrow = c(1,2))
+plot(phi_save, type = 'l')
+plot(lambda_save, type = 'l')
+
+mean(phi_save)
+mean(lambda_save)
+
+ggplot() + geom_density_2d(aes(x = phi_save, y = lambda_save))
