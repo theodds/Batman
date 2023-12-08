@@ -1,10 +1,13 @@
-#include "QBinomNode.h"
+#include "QMultinomNode.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-void QBinomNode::AddSuffStat(const QBinomData& data, int i, double phi) {
-  ss.Increment(data.Y(i), data.rho(i), data.lambda_hat(i), phi);
+void QMultinomNode::AddSuffStat(const QMultinomData& data, int i, double phi) {
+  ss.Increment(trans(data.Y.row(i)),
+               data.rho(i),
+               trans(data.lambda_hat.row(i)),
+               phi);
   if(!is_leaf) {
     double x = data.X(i,var);
     if(x <= val) {
@@ -15,7 +18,7 @@ void QBinomNode::AddSuffStat(const QBinomData& data, int i, double phi) {
   }
 }
 
-void QBinomNode::UpdateSuffStat(const QBinomData& data, double phi) {
+void QMultinomNode::UpdateSuffStat(const QMultinomData& data, double phi) {
   ResetSuffStat();
   int N = data.X.n_rows;
   for(int i = 0; i < N; i++) {
@@ -23,70 +26,72 @@ void QBinomNode::UpdateSuffStat(const QBinomData& data, double phi) {
   }
 }
 
-double PredictPois(QBinomNode* n, const rowvec& x) {
+arma::vec Predict(QMultinomNode* n, const rowvec& x) {
   if(n->is_leaf) {
     return n->lambda;
   }
   if(x(n->var) <= n->val) {
-    return PredictPois(n->left, x);
+    return Predict(n->left, x);
   }
   else {
-    return PredictPois(n->right, x);
+    return Predict(n->right, x);
   }
 }
 
-arma::vec PredictPois(QBinomNode* tree, const arma::mat& X) {
+arma::mat Predict(QMultinomNode* tree, const arma::mat& X) {
   int N = X.n_rows;
-  vec out = zeros<vec>(N);
+  int K = tree->lambda.n_elem;
+  mat out = zeros<vec>(N, K);
   for(int i = 0; i < N; i++) {
     rowvec x = X.row(i);
-    out(i) = PredictPois(tree, x);
+    out.row(i) = trans(Predict(tree, x));
   }
   return out;
 }
 
-void BackFit(QBinomData& data, QBinomNode* tree) {
-  vec lambda = PredictPois(tree, data.X);
+void BackFit(QMultinomData& data, QMultinomNode* tree) {
+  mat lambda = Predict(tree, data.X);
   data.lambda_hat = data.lambda_hat - lambda;
 }
 
-void Refit(QBinomData& data, QBinomNode* tree) {
-  vec lambda = PredictPois(tree, data.X);
+void Refit(QMultinomData& data, QMultinomNode* tree) {
+  mat lambda = Predict(tree, data.X);
   data.lambda_hat = data.lambda_hat + lambda;
 }
 
-double LogLT(QBinomNode* root, const QBinomData& data) {
+double LogLT(QMultinomNode* root, const QMultinomData& data) {
   root->UpdateSuffStat(data, root->pois_params->get_phi());
-  std::vector<QBinomNode*> leafs = leaves(root);
+  std::vector<QMultinomNode*> leafs = leaves(root);
 
-  double out = 0.0;
+  double out     = 0.0;
   int num_leaves = leafs.size();
+  int K          = root->lambda.n_elem;
+  double alpha   = root->pois_params->get_alpha();
+  double beta    = root->pois_params->get_beta();
 
   for(int i = 0; i < num_leaves; i++) {
-    double sum_Y_by_phi = leafs[i]->ss.sum_Y_by_phi;
-    double sum_exp_lambda_minus_by_phi = leafs[i]->ss.sum_exp_lambda_minus_by_phi;
-    
-    out += poisson_lgamma_marginal_loglik(sum_Y_by_phi,
-                                          0.,
-                                          sum_exp_lambda_minus_by_phi,
-                                          root->pois_params->get_alpha(),
-                                          root->pois_params->get_beta());
+    for(int k = 0; k < K; k++) {
+      double A_ell  = leafs[i]->ss.sum_Y_by_phi(k);
+      double B_ell  = leafs[i]->ss.sum_exp_lambda_minus_by_phi(k);
+      out += poisson_lgamma(marginal_loglik(A_ell, 0., B_ell, alpha, beta));
+    }
   }
   return out;
 }
 
-void UpdateParams(QBinomNode* root, const QBinomData& data) {
+void UpdateParams(QMultinomNode* root, const QMultinomData& data) {
   root->UpdateSuffStat(data, root->pois_params->get_phi());
-  std::vector<QBinomNode*> leafs = leaves(root);
+  std::vector<QMultinomNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
+  int K          = root->lambda.n_elem;
+  double alpha   = root->pois_params->get_alpha();
+  double beta    = root->pois_params->get_beta();
   for(int i = 0; i < num_leaves; i++) {
-    double sum_Y_by_phi = leafs[i]->ss.sum_Y_by_phi;
-    double sum_exp_lambda_minus_by_phi = leafs[i]->ss.sum_exp_lambda_minus_by_phi;
-    leafs[i]->lambda =
-      poisson_lgamma_draw_posterior(sum_Y_by_phi,
-                                    0.,
-                                    sum_exp_lambda_minus_by_phi,
-                                    root->pois_params->get_alpha(),
-                                    root->pois_params->get_beta());
+    for(int k = 0; k < K; k++) {
+      double A_ell = leafs[i]->ss.sum_Y_by_phi(k);
+      double B_ell = leafs[i]->ss.sum_exp_lambda_minus_by_phi(k);
+      leafs[i]->lambda(k)
+        = poisson_lgamma_draw_posterior(A_ell, 0., B_ell, alpha, beta);
+    }
   }
 }

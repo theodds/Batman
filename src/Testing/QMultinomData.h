@@ -1,23 +1,22 @@
-#ifndef QBINOM_DATA_H
-#define QBINOM_DATA_H
+#ifndef QMNOM_DATA_H
+#define QMNOM_DATA_H
 
 #include <RcppArmadillo.h>
 
-struct QBinomData {
+struct QMultinomData {
   arma::mat X;
-  arma::vec Y;
+  arma::mat Y;
   arma::vec n;
-  arma::vec lambda_hat;
+  arma::mat lambda_hat;
   arma::vec rho;
 
-  QBinomData(const arma::mat& X_, const arma::vec& Y_, const arma::vec& n_) {
+  QMultinomData(const arma::mat& X_, const arma::mat& Y_, const arma::vec& n_) {
     X = X_;
     Y = Y_;
     n = n_;
-    lambda_hat = arma::zeros<arma::vec>(X.n_rows);
-    rho = arma::ones<arma::vec>(X.n_rows);
+    lambda_hat = arma::zeros<arma::mat>(Y.n_rows, Y.n_cols);
+    rho = arma::ones<arma::vec>(Y.n_rows);
   }
-
 };
 
 #endif

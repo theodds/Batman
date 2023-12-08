@@ -1,31 +1,36 @@
-#ifndef QBinom_NODE_H
-#define QBinom_NODE_H
+#ifndef QMNOM_NODE_H
+#define QMNOM_NODE_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
-#include "QBinomParams.h"
-#include "QBinomData.h"
-#include "QBinomSS.h"
+#include "QMultinomParams.h"
+#include "QMultinomData.h"
+#include "QMultinomSS.h"
 
-struct QBinomNode : public Node<QBinomNode> {
+struct QMultinomNode : public Node<QMultinomNode> {
 
-  double lambda;
-  const QBinomParams* pois_params;
-  QBinomSuffStats ss;
+  arma::vec lambda;
+  const QMultinomParams* mnom_params;
+  QMultinomSuffStats ss;
 
- QBinomNode(TreeHypers* tree_hypers_, QBinomParams* pois_params_) :
-  Node<QBinomNode>(tree_hypers_), ss() {
-    lambda = 0.0;
-    pois_params = pois_params_;
+  QMultinomNode(TreeHypers* tree_hypers_, QMultinomParams* mnom_params_, int K) :
+  Node<QMultinomNode>(tree_hypers_), ss() {
+    lambda                         = arma::zeros<arma::vec>(K);
+    ss.sum_Y_by_phi                = arma::zeros<arma::vec>(K);
+    ss.sum_exp_lambda_minus_by_phi = arma::zeros<arma::vec>(K);
+    mnom_params                    = mnom_params_;
   }
 
- QBinomNode(QBinomNode* parent) : Node<QBinomNode>(parent), ss() {
-    lambda = 0.0;
+  QMultinomNode(QMultinomNode* parent) : Node<QMultinomNode>(parent), ss() {
+    int K = parent->lambda.n_elem;
+    lambda = arma::zeros<arma::vec>(K);
+    ss.sum_Y_by_phi                = arma::zeros<arma::vec>(K);
+    ss.sum_exp_lambda_minus_by_phi = arma::zeros<arma::vec>(K);
     pois_params = parent->pois_params;
-  }
+ }
 
-  void AddSuffStat(const QBinomData& data, int i, double phi);
-  void UpdateSuffStat(const QBinomData& data, double phi);
+  void AddSuffStat(const QMultinomData& data, int i, double phi);
+  void UpdateSuffStat(const QMultinomData& data, double phi);
 
   void ResetSuffStat() {
     ss.Reset();
@@ -36,12 +41,12 @@ struct QBinomNode : public Node<QBinomNode> {
   }
 };
 
-double PredictPois(QBinomNode* n, const arma::rowvec& x);
-arma::vec PredictPois(QBinomNode* tree, const arma::mat& X);
+arma::vec Predict(QMultinomNode* n, const arma::rowvec& x);
+arma::mat Predict(QMultinomNode* tree, const arma::mat& X);
 
-void BackFit(QBinomData& data, QBinomNode* tree);
-void Refit(QBinomData& data, QBinomNode* tree);
-double LogLT(QBinomNode* root, const QBinomData& data);
-void UpdateParams(QBinomNode* root, const QBinomData& data);
+void BackFit(QMultinomData& data, QMultinomNode* tree);
+void Refit(QMultinomData& data, QMultinomNode* tree);
+double LogLT(QMultinomNode* root, const QMultinomData& data);
+void UpdateParams(QMultinomNode* root, const QMultinomData& data);
 
 #endif
