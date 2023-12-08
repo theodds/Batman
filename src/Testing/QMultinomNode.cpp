@@ -4,7 +4,7 @@ using namespace arma;
 using namespace Rcpp;
 
 void QMultinomNode::AddSuffStat(const QMultinomData& data, int i, double phi) {
-  ss.Increment(trans(data.Y.row(i)),
+  ss.Increment(trans(data.Z.row(i)),
                data.rho(i),
                trans(data.lambda_hat.row(i)),
                phi);
@@ -71,7 +71,7 @@ double LogLT(QMultinomNode* root, const QMultinomData& data) {
 
   for(int i = 0; i < num_leaves; i++) {
     for(int k = 0; k < K; k++) {
-      double A_ell  = leafs[i]->ss.sum_Y_by_phi(k);
+      double A_ell  = leafs[i]->ss.sum_Z_by_phi(k);
       double B_ell  = leafs[i]->ss.sum_exp_lambda_minus_by_phi(k);
       out += poisson_lgamma(marginal_loglik(A_ell, 0., B_ell, alpha, beta));
     }
@@ -88,7 +88,7 @@ void UpdateParams(QMultinomNode* root, const QMultinomData& data) {
   double beta    = root->pois_params->get_beta();
   for(int i = 0; i < num_leaves; i++) {
     for(int k = 0; k < K; k++) {
-      double A_ell = leafs[i]->ss.sum_Y_by_phi(k);
+      double A_ell = leafs[i]->ss.sum_Z_by_phi(k);
       double B_ell = leafs[i]->ss.sum_exp_lambda_minus_by_phi(k);
       leafs[i]->lambda(k)
         = poisson_lgamma_draw_posterior(A_ell, 0., B_ell, alpha, beta);
