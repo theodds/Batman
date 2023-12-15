@@ -74,7 +74,7 @@ sum((y - mu)^2 / mu)
 ## and phi ~ Gam(N/2, SSE/2). What happens to the chain?
 
 lambda_0 <- 2
-N        <- 5
+N        <- 500
 phi_0    <- 2
 Y        <- phi_0 * rpois(n = N, lambda = lambda_0 / phi_0)
 
@@ -88,11 +88,12 @@ phi_save    <- numeric(num_save)
 idx         <- 1
 
 for(i in 1:num_iter) {
-  phi <- 1/rgamma(1, N/2, sum((Y - lambda)^2) / 2 / lambda)
-  while(phi > 5) {
-    phi <- 1/rgamma(1, N/2, sum((Y - lambda)^2) / 2 / lambda)
-  }
-  lambda <- rgamma(1, sum(Y) / phi, N / phi)
+  phi <- 1 / rtrunc(1, spec = "gamma", a = 1/10, b = Inf,
+                    shape = N/2, rate = sum((Y - lambda)^2) / 2 / lambda)
+  lambda <- rtrunc(1, spec = "gamma", a = 1/10, b = Inf,
+                   shape = sum(Y) / phi,
+                   rate = N / phi)
+  ## rgamma(1, sum(Y) / phi, N / phi)
 
   if(i > num_warmup) {
     lambda_save[idx] <- lambda
@@ -109,3 +110,13 @@ mean(phi_save)
 mean(lambda_save)
 
 ggplot() + geom_density_2d(aes(x = phi_save, y = lambda_save))
+
+## Is it maybe an ordering thing? ----
+
+par(mfrow = c(1,2))
+
+# phi then labmda
+plot(phi_save, lambda_save)
+
+# lambda, then phi
+plot(phi_save[-1], lambda_save[-num_save])
