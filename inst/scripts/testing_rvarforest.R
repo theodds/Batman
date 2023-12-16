@@ -31,7 +31,7 @@ empirical_sigma <- sqrt(mean(empirical_lm$residuals^2))
 
 ## Making the corest ----
 
-rvar_forest <- MakeRVar(probs)
+rvar_forest <- MakeRVar(probs, update_scale_log_tau = FALSE)
 
 ## Run warmup and save phases
 

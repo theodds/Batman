@@ -57,6 +57,10 @@ void UpdateTau0(RVarParams& var_params, RVarData& data) {
 }
 
 void UpdateScaleLogTau(RVarParams& var_params, std::vector<double>& tau) {
+  // If we don't want to update, we don't update
+  if(!var_params.update_scale_log_tau) return;
+
+  // Otherwise, we do update using slice sampling
   double n = tau.size();
   double sum_lambda = 0.;
   double sum_exp_lambda = 0.;
@@ -125,13 +129,15 @@ List RVarBart(const arma::mat& X,
              double sigma_scale_log_tau,
              double shape_tau_0, double rate_tau_0,
              int num_trees,
-             int num_burn, int num_thin, int num_save)
+              int num_burn, int num_thin, int num_save,
+              bool update_scale_log_tau)
 {
   TreeHypers tree_hypers(probs);
   RVarParams var_params(sigma_scale_log_tau,
                         sigma_scale_log_tau,
                         shape_tau_0,
-                        rate_tau_0);
+                        rate_tau_0,
+                        update_scale_log_tau);
   RVarForest forest(num_trees, &tree_hypers, &var_params);
   RVarData data(X, Y);
   mat tau = zeros<mat>(num_save, Y.size());

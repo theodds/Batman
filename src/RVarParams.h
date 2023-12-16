@@ -10,10 +10,12 @@ struct RVarParams {
 RVarParams(double scale_log_tau_,
            double sigma_scale_log_tau_,
            double shape_tau_0_,
-           double rate_tau_0_) :
+           double rate_tau_0_,
+           bool update_scale_log_tau_) :
   scale_log_tau(scale_log_tau_),
     sigma_scale_log_tau(sigma_scale_log_tau_),
-    shape_tau_0(shape_tau_0_), rate_tau_0(rate_tau_0_)
+    shape_tau_0(shape_tau_0_), rate_tau_0(rate_tau_0_),
+    update_scale_log_tau(update_scale_log_tau_)
   {
     tau_0 = 1.0;
     scale_lambda_to_ab();
@@ -23,6 +25,7 @@ RVarParams(double scale_log_tau_,
   double rate_tau_0;
   double tau_0;
   double sigma_scale_log_tau;
+  bool update_scale_log_tau;
 
   double get_alpha() const {return alpha;}
   double get_beta() const {return beta;}

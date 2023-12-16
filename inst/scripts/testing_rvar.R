@@ -39,7 +39,8 @@ out <- RVarBart(X = X, Y = Y_scale,
                 num_trees = num_tree,
                 num_burn = 4000,
                 num_thin = 1,
-                num_save = 4000)
+                num_save = 4000,
+                update_scale_log_tau = TRUE)
 
 outr <- rbart(X, Y, ntree = num_tree, ntreeh = num_tree, ndpost = 4000, nskip = 4000)
 
@@ -60,6 +61,6 @@ plot(out$scale_lambda, type = 'l')
 
 ## Measure Accuracy ----
 
-mean(abs(log(sigma_hat) - log(sigma)))
-mean(abs(log(pred_outr$smean) - log(sigma)))
+mean(abs(log(sigma_hat) - log(sigma))^2)
+mean(abs(log(pred_outr$smean) - log(sigma))^2)
 

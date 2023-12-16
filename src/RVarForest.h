@@ -32,10 +32,12 @@ struct RVarForest {
     double sigma_scale_log_tau = hypers["sigma_scale_log_tau"];
     double shape_tau_0 = hypers["shape_tau_0"];
     double rate_tau_0 = hypers["rate_tau_0"];
+    bool update_scale_log_tau = hypers["update_scale_log_tau"];
     var_params = new RVarParams(sigma_scale_log_tau,
                                 sigma_scale_log_tau,
                                 shape_tau_0,
-                                rate_tau_0);
+                                rate_tau_0,
+                                update_scale_log_tau);
     
     int num_trees = hypers["num_tree"];
     trees.resize(0);
