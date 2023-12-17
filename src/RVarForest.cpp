@@ -124,15 +124,17 @@ void UpdateScaleLogTau(RVarParams& var_params, std::vector<double>& tau) {
 
 // [[Rcpp::export]]
 List RVarBart(const arma::mat& X,
-             const arma::vec& Y,
-             const arma::sp_mat& probs,
-             double sigma_scale_log_tau,
-             double shape_tau_0, double rate_tau_0,
-             int num_trees,
+              const arma::vec& Y,
+              const arma::sp_mat& probs,
+              double sigma_scale_log_tau,
+              double shape_tau_0, double rate_tau_0,
+              int num_trees,
               int num_burn, int num_thin, int num_save,
-              bool update_scale_log_tau)
+              bool update_scale_log_tau,
+              bool update_s)
 {
   TreeHypers tree_hypers(probs);
+  tree_hypers.update_s = update_s;
   RVarParams var_params(sigma_scale_log_tau,
                         sigma_scale_log_tau,
                         shape_tau_0,

@@ -33,6 +33,8 @@ struct RVarForest {
     double shape_tau_0 = hypers["shape_tau_0"];
     double rate_tau_0 = hypers["rate_tau_0"];
     bool update_scale_log_tau = hypers["update_scale_log_tau"];
+    bool update_s = hypers["update_s"];
+    tree_hypers->update_s = update_s;
     var_params = new RVarParams(sigma_scale_log_tau,
                                 sigma_scale_log_tau,
                                 shape_tau_0,

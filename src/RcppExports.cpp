@@ -222,8 +222,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // RVarBart
-List RVarBart(const arma::mat& X, const arma::vec& Y, const arma::sp_mat& probs, double sigma_scale_log_tau, double shape_tau_0, double rate_tau_0, int num_trees, int num_burn, int num_thin, int num_save, bool update_scale_log_tau);
-RcppExport SEXP _Batman_RVarBart(SEXP XSEXP, SEXP YSEXP, SEXP probsSEXP, SEXP sigma_scale_log_tauSEXP, SEXP shape_tau_0SEXP, SEXP rate_tau_0SEXP, SEXP num_treesSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP, SEXP update_scale_log_tauSEXP) {
+List RVarBart(const arma::mat& X, const arma::vec& Y, const arma::sp_mat& probs, double sigma_scale_log_tau, double shape_tau_0, double rate_tau_0, int num_trees, int num_burn, int num_thin, int num_save, bool update_scale_log_tau, bool update_s);
+RcppExport SEXP _Batman_RVarBart(SEXP XSEXP, SEXP YSEXP, SEXP probsSEXP, SEXP sigma_scale_log_tauSEXP, SEXP shape_tau_0SEXP, SEXP rate_tau_0SEXP, SEXP num_treesSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP, SEXP update_scale_log_tauSEXP, SEXP update_sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -238,7 +238,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
     Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
     Rcpp::traits::input_parameter< bool >::type update_scale_log_tau(update_scale_log_tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(RVarBart(X, Y, probs, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_trees, num_burn, num_thin, num_save, update_scale_log_tau));
+    Rcpp::traits::input_parameter< bool >::type update_s(update_sSEXP);
+    rcpp_result_gen = Rcpp::wrap(RVarBart(X, Y, probs, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_trees, num_burn, num_thin, num_save, update_scale_log_tau, update_s));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -468,7 +469,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_QGammaBart", (DL_FUNC) &_Batman_QGammaBart, 10},
     {"_Batman_QNBBart", (DL_FUNC) &_Batman_QNBBart, 10},
     {"_Batman_QPoisBart", (DL_FUNC) &_Batman_QPoisBart, 10},
-    {"_Batman_RVarBart", (DL_FUNC) &_Batman_RVarBart, 11},
+    {"_Batman_RVarBart", (DL_FUNC) &_Batman_RVarBart, 12},
     {"_Batman_RegBart", (DL_FUNC) &_Batman_RegBart, 10},
     {"_Batman_doit", (DL_FUNC) &_Batman_doit, 0},
     {"_Batman_WeibAugment", (DL_FUNC) &_Batman_WeibAugment, 4},
