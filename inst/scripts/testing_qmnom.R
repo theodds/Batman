@@ -1,122 +1,146 @@
-## Load ----
+## Load ------------------------------------------------------------------------
 
 library(tidyverse)
 library(Batman)
 library(mvtnorm)
 library(truncdist)
+library(MCMCpack)
 
-## Testing Woodburry ----
+## Generate data ---------------------------------------------------------------
 
-# To reproduce
-set.seed(193487)
+N <- 400
+K <- 3
+P <- 5
 
-mu <- runif(4)
-mu <- mu / sum(mu)
-mu <- mu[-4]
-D <- diag(mu)
-Dinv <- diag(1/mu)
-J <- matrix(1, nrow = 3, ncol = 3)
-y <- rnorm(3)
+X     <- matrix(runif(N * P), nrow = N, ncol = P)
+eta_1 <- X[,1] + X[,2]
+eta_2 <- X[,1] + X[,3]
+eta_3 <- X[,2] + X[,3]
+eta   <- cbind(eta_1, eta_2, eta_3)
 
-                                        # Exact version
-solve(D - mu %*% t(mu))
+softmax <- function(x) exp(x) / sum(exp(x))
+mu_0      <- apply(eta, 1, softmax) %>% t()
+rho_0     <- 1
+phi_0     <- 1 / (rho_0 + 1)
 
-                                        # Woodburry
-Dinv + Dinv %*% mu %*% t(mu) %*% Dinv / as.numeric(1 - t(mu) %*% Dinv %*% mu)
+Y <- apply(mu, 1, \(m) rdirichlet(1, m * rho_0)) %>% t()
 
-                                        # Simplified: verified!
-Dinv + J / (1 - sum(mu))
+## Fitting the model -----------------------------------------------------------
 
-                                        # What about inner product? Verified
-as.numeric(t(y) %*% (Dinv + J / (1 - sum(mu))) %*% y)
-sum(y^2 / mu) + sum(y)^2 / (1 - sum(mu))
+## Junk having to do with doing the matrix inversion ---------------------------
 
-## OK: does ordering matter? Under constraint that sum(y) = sum(mu) Verified!
-## just need to remember that I need to subtract Y from mu, as it isn't true for
-## arbitrary choices of y.
+## All it did was reduce to the usual X^2 statistics!!!
 
-set.seed(193487)
+## # To reproduce
+## set.seed(193487)
 
-mu <- runif(4)
-mu <- mu / sum(mu)
-y  <- runif(4)
-y  <-  y / sum(y)
+## mu <- runif(4)
+## mu <- mu / sum(mu)
+## mu <- mu[-4]
+## D <- diag(mu)
+## Dinv <- diag(1/mu)
+## J <- matrix(1, nrow = 3, ncol = 3)
+## y <- rnorm(3)
 
-mu1 <- mu[-1]
-mu4 <- mu[-4]
-y1  <- y[-1] - mu1
-y4  <- y[-4] - mu4
+## ## Exact version
+## solve(D - mu %*% t(mu))
 
-sum(y1^2 / mu1) + sum(y1)^2 / (mu[1])
-sum(y4^2 / mu4) + sum(y4)^2 / (mu[4])
+## ## Woodburry
+## Dinv + Dinv %*% mu %*% t(mu) %*% Dinv / as.numeric(1 - t(mu) %*% Dinv %*% mu)
 
-Sigma  <- diag(mu) - mu %*% t(mu)
-Sigma1 <- diag(mu1) - mu1 %*% t(mu1)
-Sigma4 <- diag(mu4) - mu4 %*% t(mu4)
+## ## Simplified: verified!
+## Dinv + J / (1 - sum(mu))
 
-mvtnorm::dmvnorm(y1, sigma = Sigma1)
-mvtnorm::dmvnorm(y4, sigma = Sigma4)
-mvtnorm::dmvnorm(y, sigma = Sigma)
+## ## What about inner product? Verified
+## as.numeric(t(y) %*% (Dinv + J / (1 - sum(mu))) %*% y)
+## sum(y^2 / mu) + sum(y)^2 / (1 - sum(mu))
 
-## What is going on? The maximum likelihood estimator of phi should not depend
-## on which point I drop out? Is the issue that I'm not subtracting? I guess
-## probably this is the issue
+## ## OK: does ordering matter? Under constraint that sum(y) = sum(mu) Verified!
+## ## just need to remember that I need to subtract Y from mu, as it isn't true for
+## ## arbitrary choices of y.
 
-## Testing an alternate form ----
+## set.seed(193487)
 
-sum((y - mu)^2 / (mu * (1 - mu)))
-sum((y - mu)^2 / mu)
+## mu <- runif(4)
+## mu <- mu / sum(mu)
+## y  <- runif(4)
+## y  <-  y / sum(y)
 
-## What about stationary distribution? ----
+## mu1 <- mu[-1]
+## mu4 <- mu[-4]
+## y1  <- y[-1] - mu1
+## y4  <- y[-4] - mu4
 
-## Let's look at a simple setting of the Quasi-Poisson under the
-## pseudo-likelihood approach. Under this, we have lambda ~ Gam(S/phi, N/phi)
-## and phi ~ Gam(N/2, SSE/2). What happens to the chain?
+## sum(y1^2 / mu1) + sum(y1)^2 / (mu[1])
+## sum(y4^2 / mu4) + sum(y4)^2 / (mu[4])
 
-lambda_0 <- 2
-N        <- 500
-phi_0    <- 2
-Y        <- phi_0 * rpois(n = N, lambda = lambda_0 / phi_0)
+## Sigma  <- diag(mu) - mu %*% t(mu)
+## Sigma1 <- diag(mu1) - mu1 %*% t(mu1)
+## Sigma4 <- diag(mu4) - mu4 %*% t(mu4)
 
-num_warmup  <- 0
-num_save    <- 5000
-num_iter    <- num_save + num_warmup
-lambda      <- 2
-phi         <- 2
-lambda_save <- numeric(num_save)
-phi_save    <- numeric(num_save)
-idx         <- 1
+## mvtnorm::dmvnorm(y1, sigma = Sigma1)
+## mvtnorm::dmvnorm(y4, sigma = Sigma4)
+## mvtnorm::dmvnorm(y, sigma = Sigma)
 
-for(i in 1:num_iter) {
-  phi <- 1 / rtrunc(1, spec = "gamma", a = 1/10, b = Inf,
-                    shape = N/2, rate = sum((Y - lambda)^2) / 2 / lambda)
-  lambda <- rtrunc(1, spec = "gamma", a = 1/10, b = Inf,
-                   shape = sum(Y) / phi,
-                   rate = N / phi)
-  ## rgamma(1, sum(Y) / phi, N / phi)
+## ## What is going on? The maximum likelihood estimator of phi should not depend
+## ## on which point I drop out? Is the issue that I'm not subtracting? I guess
+## ## probably this is the issue
 
-  if(i > num_warmup) {
-    lambda_save[idx] <- lambda
-    phi_save[idx] <- phi
-    idx <- idx + 1
-  }
-}
+## ## Testing an alternate form ----
 
-par(mfrow = c(1,2))
-plot(phi_save, type = 'l')
-plot(lambda_save, type = 'l')
+## sum((y - mu)^2 / (mu * (1 - mu)))
+## sum((y - mu)^2 / mu)
 
-mean(phi_save)
-mean(lambda_save)
+## ## What about stationary distribution? ----
 
-ggplot() + geom_density_2d(aes(x = phi_save, y = lambda_save))
+## ## Let's look at a simple setting of the Quasi-Poisson under the
+## ## pseudo-likelihood approach. Under this, we have lambda ~ Gam(S/phi, N/phi)
+## ## and phi ~ Gam(N/2, SSE/2). What happens to the chain?
 
-## Is it maybe an ordering thing? ----
+## lambda_0 <- 2
+## N        <- 500
+## phi_0    <- 2
+## Y        <- phi_0 * rpois(n = N, lambda = lambda_0 / phi_0)
 
-par(mfrow = c(1,2))
+## num_warmup  <- 0
+## num_save    <- 5000
+## num_iter    <- num_save + num_warmup
+## lambda      <- 2
+## phi         <- 2
+## lambda_save <- numeric(num_save)
+## phi_save    <- numeric(num_save)
+## idx         <- 1
 
-# phi then labmda
-plot(phi_save, lambda_save)
+## for(i in 1:num_iter) {
+##   phi <- 1 / rtrunc(1, spec = "gamma", a = 1/10, b = Inf,
+##                     shape = N/2, rate = sum((Y - lambda)^2) / 2 / lambda)
+##   lambda <- rtrunc(1, spec = "gamma", a = 1/10, b = Inf,
+##                    shape = sum(Y) / phi,
+##                    rate = N / phi)
+##   ## rgamma(1, sum(Y) / phi, N / phi)
 
-# lambda, then phi
-plot(phi_save[-1], lambda_save[-num_save])
+##   if(i > num_warmup) {
+##     lambda_save[idx] <- lambda
+##     phi_save[idx] <- phi
+##     idx <- idx + 1
+##   }
+## }
+
+## par(mfrow = c(1,2))
+## plot(phi_save, type = 'l')
+## plot(lambda_save, type = 'l')
+
+## mean(phi_save)
+## mean(lambda_save)
+
+## ggplot() + geom_density_2d(aes(x = phi_save, y = lambda_save))
+
+## ## Is it maybe an ordering thing? ----
+
+## par(mfrow = c(1,2))
+
+## # phi then labmda
+## plot(phi_save, lambda_save)
+
+## # lambda, then phi
+## plot(phi_save[-1], lambda_save[-num_save])

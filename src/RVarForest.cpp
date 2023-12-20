@@ -192,7 +192,6 @@ arma::mat RVarForest::do_gibbs(const arma::mat& X, const arma::vec& Y,
       Rcpp::Rcout << "\rFinishing iteration  " << num_gibbs + 1 << "\t\t\t";
     }
   }
-  Rcout << std::endl;
   return tau_out;
 }
 
