@@ -1,9 +1,9 @@
-#ifndef QGAMMA_DATA_H
-#define QGAMMA_DATA_H
+#ifndef QPOWER_DATA_H
+#define QPOWER_DATA_H
 
 #include <RcppArmadillo.h>
 
-struct QGammaData {
+struct QPowerData {
   arma::mat X;
   arma::vec Y;
   arma::vec lambda_hat;

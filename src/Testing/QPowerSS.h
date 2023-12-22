@@ -1,26 +1,25 @@
-#ifndef QGAMMA_SS_H
-#define QGAMMA_SS_H
+#ifndef QPOWER_SS_H
+#define QPOWER_SS_H
 
 #include <RcppArmadillo.h>
 
-struct QGammaSuffStats {
-  double sum_1_by_phi;
-  double sum_exp_lambda_minus_y;
+struct QPowerSuffStats {
+  double A;
+  double B;
 
-  QGammaSuffStats() {
+  QPowerSuffStats() {
     Reset();
   }
 
   void Reset() {
-    sum_1_by_phi = 0.;
-    sum_exp_lambda_minus_y = 0.;
+    A = 0.;
+    B = 0.;
   }
 
-  void Increment(double y, double lambda_minus, double phi) {
-    sum_1_by_phi            += 1. / phi;
-    sum_exp_lambda_minus_y  += exp(lambda_minus) * y / phi;
+  void Increment(double y, double lambda_minus, double phi, double p) {
+    A += y * exp(lambda_minus * (1. - p));
+    B += exp(lambda_minus * (2. - p));
   }
-
 };
 
 #endif

@@ -1,31 +1,31 @@
-#ifndef QGamma_NODE_H
-#define QGamma_NODE_H
+#ifndef QPOWER_NODE_H
+#define QPOWER_NODE_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
-#include "QGammaParams.h"
-#include "QGammaData.h"
-#include "QGammaSS.h"
+#include "QPowerParams.h"
+#include "QPowerData.h"
+#include "QPowerSS.h"
 
-struct QGammaNode : public Node<QGammaNode> {
+struct QPowerNode : public Node<QPowerNode> {
 
   double lambda;
-  const QGammaParams* pois_params;
-  QGammaSuffStats ss;
+  const QPowerParams* pois_params;
+  QPowerSuffStats ss;
 
- QGammaNode(TreeHypers* tree_hypers_, QGammaParams* pois_params_) :
-  Node<QGammaNode>(tree_hypers_), ss() {
+ QPowerNode(TreeHypers* tree_hypers_, QPowerParams* pois_params_) :
+  Node<QPowerNode>(tree_hypers_), ss() {
     lambda = 0.0;
     pois_params = pois_params_;
   }
 
- QGammaNode(QGammaNode* parent) : Node<QGammaNode>(parent), ss() {
+ QPowerNode(QPowerNode* parent) : Node<QPowerNode>(parent), ss() {
     lambda = 0.0;
     pois_params = parent->pois_params;
   }
 
-  void AddSuffStat(const QGammaData& data, int i, double phi);
-  void UpdateSuffStat(const QGammaData& data, double phi);
+  void AddSuffStat(const QPowerData& data, int i, double phi, double p);
+  void UpdateSuffStat(const QPowerData& data, double phi, double p);
 
   void ResetSuffStat() {
     ss.Reset();
@@ -36,12 +36,12 @@ struct QGammaNode : public Node<QGammaNode> {
   }
 };
 
-double PredictPois(QGammaNode* n, const arma::rowvec& x);
-arma::vec PredictPois(QGammaNode* tree, const arma::mat& X);
+double PredictPois(QPowerNode* n, const arma::rowvec& x);
+arma::vec PredictPois(QPowerNode* tree, const arma::mat& X);
 
-void BackFit(QGammaData& data, QGammaNode* tree);
-void Refit(QGammaData& data, QGammaNode* tree);
-double LogLT(QGammaNode* root, const QGammaData& data);
-void UpdateParams(QGammaNode* root, const QGammaData& data);
+void BackFit(QPowerData& data, QPowerNode* tree);
+void Refit(QPowerData& data, QPowerNode* tree);
+double LogLT(QPowerNode* root, const QPowerData& data);
+void UpdateParams(QPowerNode* root, const QPowerData& data);
 
 #endif
