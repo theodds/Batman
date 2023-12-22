@@ -15,7 +15,10 @@ struct QMultinomData {
     X = X_;
     Y = Y_;
     n = n_;
-    Z = Y % n;
+    Z = Y;
+    for(int i = 0; i < Y.n_rows; i++) {
+      Z.row(i) = Z.row(i) * n(i);
+    }
     lambda_hat = arma::zeros<arma::mat>(Y.n_rows, Y.n_cols);
     rho = arma::ones<arma::vec>(Y.n_rows);
   }

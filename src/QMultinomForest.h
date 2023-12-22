@@ -12,10 +12,11 @@ struct QMultinomForest {
 
   QMultinomForest(int num_trees,
                   TreeHypers* tree_hypers,
-                  QMultinomParams* mnom_params) {
+                  QMultinomParams* mnom_params,
+                  int K) {
     trees.resize(0);
     for(int t = 0; t < num_trees; t++) {
-      QMultinomNode* n = new QMultinomNode(tree_hypers, mnom_params);
+      QMultinomNode* n = new QMultinomNode(tree_hypers, mnom_params, K);
       trees.push_back(n);
     }
   }

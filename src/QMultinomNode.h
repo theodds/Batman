@@ -16,7 +16,7 @@ struct QMultinomNode : public Node<QMultinomNode> {
   QMultinomNode(TreeHypers* tree_hypers_, QMultinomParams* mnom_params_, int K) :
   Node<QMultinomNode>(tree_hypers_), ss() {
     lambda                         = arma::zeros<arma::vec>(K);
-    ss.sum_Y_by_phi                = arma::zeros<arma::vec>(K);
+    ss.sum_Z_by_phi                = arma::zeros<arma::vec>(K);
     ss.sum_exp_lambda_minus_by_phi = arma::zeros<arma::vec>(K);
     mnom_params                    = mnom_params_;
   }
@@ -24,9 +24,9 @@ struct QMultinomNode : public Node<QMultinomNode> {
   QMultinomNode(QMultinomNode* parent) : Node<QMultinomNode>(parent), ss() {
     int K = parent->lambda.n_elem;
     lambda = arma::zeros<arma::vec>(K);
-    ss.sum_Y_by_phi                = arma::zeros<arma::vec>(K);
+    ss.sum_Z_by_phi                = arma::zeros<arma::vec>(K);
     ss.sum_exp_lambda_minus_by_phi = arma::zeros<arma::vec>(K);
-    pois_params = parent->pois_params;
+    mnom_params = parent->mnom_params;
  }
 
   void AddSuffStat(const QMultinomData& data, int i, double phi);

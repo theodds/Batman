@@ -5,27 +5,128 @@ library(Batman)
 library(mvtnorm)
 library(truncdist)
 library(MCMCpack)
+library(devtools)
+library(dbarts)
 
 ## Generate data ---------------------------------------------------------------
 
-N <- 400
+N <- 4000
 K <- 3
 P <- 5
 
 X     <- matrix(runif(N * P), nrow = N, ncol = P)
-eta_1 <- X[,1] + X[,2]
-eta_2 <- X[,1] + X[,3]
-eta_3 <- X[,2] + X[,3]
-eta   <- cbind(eta_1, eta_2, eta_3)
+eta_1 <- 2 * X[,1] + X[,2]
+eta_2 <- X[,1] + 4 * X[,3] * X[,2]
+eta_3 <- X[,2] + 2 * X[,3]
+eta   <- 3 * cbind(eta_1, eta_2, eta_3)
 
 softmax <- function(x) exp(x) / sum(exp(x))
 mu_0      <- apply(eta, 1, softmax) %>% t()
-rho_0     <- 1
+rho_0     <- 0.5
 phi_0     <- 1 / (rho_0 + 1)
+n         <- rep(1, N)
 
-Y <- apply(mu, 1, \(m) rdirichlet(1, m * rho_0)) %>% t()
+Y <- apply(mu_0, 1, \(m) rdirichlet(1, m * rho_0)) %>% t()
 
 ## Fitting the model -----------------------------------------------------------
+
+probs          <- Matrix::Matrix(diag(P))
+num_tree       <- 50
+scale_lambda   <- 1 / sqrt(num_tree)
+scale_lambda_0 <- 100
+num_burn       <- 1000
+num_thin       <- 1
+num_save       <- 1000
+
+fitted_qmnom <- QMultinomBart(X, Y, n, X, probs, num_tree, scale_lambda,
+                              scale_lambda_0, num_burn, num_thin, num_save)
+
+## Did we get phi correct? -----------------------------------------------------
+
+hist(fitted_qmnom$phi)
+abline(v = phi_0, lty = 3, lwd = 2)
+
+## What about mu? --------------------------------------------------------------
+
+mu_unnom <- exp(fitted_qmnom$lambda)
+denoms   <- mu_unnom[,1,] + mu_unnom[,2,] + mu_unnom[,3,]
+f <- function() {
+  mu <- mu_unnom
+  for(i in 1:dim(mu_unnom)[2]) {
+    mu[,i,] <- mu[,i,] / denoms
+  }
+  return(mu)
+}
+mu <- f()
+mu_hat <- apply(mu, c(1,2), mean)
+
+par(mfrow=c(1,3))
+plot(mu_hat[,1], mu_0[,1])
+abline(a=0,b=1)
+plot(mu_hat[,2], mu_0[,2])
+abline(a=0,b=1)
+plot(mu_hat[,3], mu_0[,3])
+abline(a=0,b=1)
+par(mfrow=c(1,1))
+
+## What about relevant variables? ----------------------------------------------
+
+plot(colMeans(fitted_qmnom$counts > 0), ylim = c(0,1))
+
+## How does this compute with one-at-a-time? -----------------------------------
+
+fitted_dbart <-
+  bart(
+    x.train = X,
+    y.train = Y[, 1],
+    x.test = X,
+    ndpost = 4000,
+    nskip = 4000
+  )
+
+## plot ------------------------------------------------------------------------
+
+par(mfrow = c(1,2))
+mu_hat_dbarts <- fitted_dbart$yhat.test.mean
+plot(mu_hat_dbarts, mu_0[,1])
+plot(mu_hat[,1], mu_0[,1], col = 'blue')
+
+
+rmse <- function(x,y) sqrt(mean(abs(x - y)^2))
+rmse(mu_hat_dbarts, mu_0[,1])
+rmse(mu_hat[,1], mu_0[,1])
+
+par(mfrow=c(1,1))
+plot(density(fitted_dbart$yhat.test[,1]))
+lines(density(mu[1,1,]))
+abline(v = mu_0[1,1])
+
+## Let's investigate the coverage of intervals and their widths! ---------------
+
+mu_0_1    <- mu_0[,1]
+mu_1      <- mu[,1,] %>% t()
+mu_dbarts <- fitted_dbart$yhat.test
+
+row_cis <- function(y) apply(y, 2, \(x) quantile(x, c(0.025, 0.975))) %>% t()
+row_sds <- function(y) apply(y, 2, sd)
+
+qmn_cis <- row_cis(mu_1)
+bart_cis <- row_cis(mu_dbarts)
+sd_qmn <- row_sds(mu_1)
+sd_bart <- row_sds(mu_dbarts)
+
+coverage_qmn  <- (mu_0_1 <= qmn_cis[,2] & mu_0_1 >= qmn_cis[,1])
+coverage_bart <- (mu_0_1 <= bart_cis[,2] & mu_0_1 >= bart_cis[,1])
+
+uq_data <-
+  data.frame(
+    sample = rep(1:N, 2),
+    method = rep(c("QMN", "BART"), each = N),
+    sds = c(sd_qmn, sd_bart),
+    coverage = c(coverage_qmn, coverage_bart)
+  )
+
+uq_data %>% group_by(method) %>% summarise_all(mean)
 
 ## Junk having to do with doing the matrix inversion ---------------------------
 

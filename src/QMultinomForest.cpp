@@ -13,17 +13,17 @@ arma::mat Predict(std::vector<QMultinomNode*>& forest, const arma::mat& X) {
   return out;
 }
 
-double fast_YtVinvY(arma::rowvec& y, arma::rowvec& mu) {
-  int K = y.n_elem;
-  double term_1 = 0;
-  double term_2 = 0;
-  for(int k = 0; k < K - 1; k++) {
-    term_1 += pow(y(k) - mu(k), 2) / mu(k);
-    term_2 += y(k) - mu(k);
-  }
-  term_2 = pow(term_2, 2) / mu(K - 1);
-  return term_1 + term_2;
-}
+// double fast_YtVinvY(arma::rowvec& y, arma::rowvec& mu) {
+//   int K = y.n_elem;
+//   double term_1 = 0;
+//   double term_2 = 0;
+//   for(int k = 0; k < K - 1; k++) {
+//     term_1 += pow(y(k) - mu(k), 2) / mu(k);
+//     term_2 += y(k) - mu(k);
+//   }
+//   term_2 = pow(term_2, 2) / mu(K - 1);
+//   return term_1 + term_2;
+// }
 
 void UpdateHypers(QMultinomParams& hypers, std::vector<QMultinomNode*>& trees,
                   QMultinomData& data)
@@ -33,7 +33,7 @@ void UpdateHypers(QMultinomParams& hypers, std::vector<QMultinomNode*>& trees,
 
   // Compute the mean
   arma::mat mu = exp(data.lambda_hat);
-  arma::vec sum_exp = arma::vec<arma::zeros>(N);
+  arma::vec sum_exp = arma::zeros<arma::vec>(N);
   for(int i = 0; i < N; i++) {
     sum_exp(i) = sum(mu.row(i));
     mu.row(i) = mu.row(i) / sum_exp(i);
@@ -58,7 +58,7 @@ void UpdateHypers(QMultinomParams& hypers, std::vector<QMultinomNode*>& trees,
   }
 
   // Update phi
-  double phi = 0.
+  double phi = 0.;
   for(int i = 0; i < N; i++) {
     for(int k = 0; k < K; k++) {
       phi += omega(i) * data.n(i) * pow(data.Y(i,k) - mu(i,k), 2) / mu(i,k);
@@ -88,10 +88,10 @@ List QMultinomBart(const arma::mat& X,
   // Rcout << "TreeHypers tree_hypers(probs);" << std::endl;
   TreeHypers tree_hypers(probs);
   QMultinomParams mnom_params(scale_lambda_0, scale_lambda, 1.0);
-  QMultinomForest forest(num_trees, &tree_hypers, &pois_params);
+  QMultinomForest forest(num_trees, &tree_hypers, &mnom_params, K);
   QMultinomData data(X,Y, n);
   cube lambda = zeros<cube>(N, K, num_save);
-  cube lambda_test = zeros<mat>(N_test, K, num_save);
+  cube lambda_test = zeros<cube>(N_test, K, num_save);
   umat counts = zeros<umat>(num_save, probs.n_cols);
   vec phi = zeros<vec>(num_save);
 
@@ -105,7 +105,7 @@ List QMultinomBart(const arma::mat& X,
 
   for(int iter = 0; iter < num_save; iter++) {
     for(int j = 0; j < num_thin; j++) {
-      IterateGibbs(forest.trees, data, pois_params, tree_hypers);
+      IterateGibbs(forest.trees, data, mnom_params, tree_hypers);
     }
     if(iter % 100 == 0) Rcout << "\rFinishing save iteration "
                               << iter << "\t\t\t";

@@ -4,7 +4,7 @@
 #include <RcppArmadillo.h>
 
 struct QMultinomSuffStats {
-  arma::vec sum_Y_by_phi;
+  arma::vec sum_Z_by_phi;
   arma::vec sum_exp_lambda_minus_by_phi;
 
   QMultinomSuffStats() {

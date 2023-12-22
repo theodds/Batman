@@ -41,7 +41,7 @@ arma::vec Predict(QMultinomNode* n, const rowvec& x) {
 arma::mat Predict(QMultinomNode* tree, const arma::mat& X) {
   int N = X.n_rows;
   int K = tree->lambda.n_elem;
-  mat out = zeros<vec>(N, K);
+  mat out = zeros<mat>(N, K);
   for(int i = 0; i < N; i++) {
     rowvec x = X.row(i);
     out.row(i) = trans(Predict(tree, x));
@@ -60,32 +60,32 @@ void Refit(QMultinomData& data, QMultinomNode* tree) {
 }
 
 double LogLT(QMultinomNode* root, const QMultinomData& data) {
-  root->UpdateSuffStat(data, root->pois_params->get_phi());
+  root->UpdateSuffStat(data, root->mnom_params->get_phi());
   std::vector<QMultinomNode*> leafs = leaves(root);
 
   double out     = 0.0;
   int num_leaves = leafs.size();
   int K          = root->lambda.n_elem;
-  double alpha   = root->pois_params->get_alpha();
-  double beta    = root->pois_params->get_beta();
+  double alpha   = root->mnom_params->get_alpha();
+  double beta    = root->mnom_params->get_beta();
 
   for(int i = 0; i < num_leaves; i++) {
     for(int k = 0; k < K; k++) {
       double A_ell  = leafs[i]->ss.sum_Z_by_phi(k);
       double B_ell  = leafs[i]->ss.sum_exp_lambda_minus_by_phi(k);
-      out += poisson_lgamma(marginal_loglik(A_ell, 0., B_ell, alpha, beta));
+      out += poisson_lgamma_marginal_loglik(A_ell, 0., B_ell, alpha, beta);
     }
   }
   return out;
 }
 
 void UpdateParams(QMultinomNode* root, const QMultinomData& data) {
-  root->UpdateSuffStat(data, root->pois_params->get_phi());
+  root->UpdateSuffStat(data, root->mnom_params->get_phi());
   std::vector<QMultinomNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
   int K          = root->lambda.n_elem;
-  double alpha   = root->pois_params->get_alpha();
-  double beta    = root->pois_params->get_beta();
+  double alpha   = root->mnom_params->get_alpha();
+  double beta    = root->mnom_params->get_beta();
   for(int i = 0; i < num_leaves; i++) {
     for(int k = 0; k < K; k++) {
       double A_ell = leafs[i]->ss.sum_Z_by_phi(k);
