@@ -6,11 +6,11 @@ using namespace Rcpp;
 void hessian_power(arma::vec& gradient,
                    arma::mat& hessian,
                    double p,
-                   double phi
+                   double phi,
                    const arma::vec& omega,
                    const QPowerData& data) {
   int N    = data.Y.n_elem;
-  vec mu   = exp(data.Y.lambda_hat);
+  vec mu   = exp(data.lambda_hat);
 
   double D_phi = 0.;
   double D_p = 0;
@@ -78,7 +78,7 @@ void UpdateHypers(QPowerParams& hypers, std::vector<QPowerNode*>& trees,
   }
 
   hypers.phi = phi_p(0);
-  hypers.p = phi_p(1);f
+  hypers.p = phi_p(1);
 }
 
 // [[Rcpp::export]]

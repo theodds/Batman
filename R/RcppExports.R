@@ -45,6 +45,10 @@ QPoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda
     .Call(`_Batman_QPoisBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
+QPowerBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
+    .Call(`_Batman_QPowerBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
+}
+
 RVarBart <- function(X, Y, probs, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_trees, num_burn, num_thin, num_save, update_scale_log_tau, update_s) {
     .Call(`_Batman_RVarBart`, X, Y, probs, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_trees, num_burn, num_thin, num_save, update_scale_log_tau, update_s)
 }

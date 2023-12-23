@@ -242,6 +242,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// QPowerBart
+List QPowerBart(const arma::mat& X, const arma::vec& Y, const arma::mat& X_test, const arma::sp_mat& probs, int num_trees, double scale_lambda, double scale_lambda_0, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_QPowerBart(SEXP XSEXP, SEXP YSEXP, SEXP X_testSEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP scale_lambda_0SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X_test(X_testSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type probs(probsSEXP);
+    Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
+    Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type scale_lambda_0(scale_lambda_0SEXP);
+    Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
+    Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
+    Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
+    rcpp_result_gen = Rcpp::wrap(QPowerBart(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save));
+    return rcpp_result_gen;
+END_RCPP
+}
 // RVarBart
 List RVarBart(const arma::mat& X, const arma::vec& Y, const arma::sp_mat& probs, double sigma_scale_log_tau, double shape_tau_0, double rate_tau_0, int num_trees, int num_burn, int num_thin, int num_save, bool update_scale_log_tau, bool update_s);
 RcppExport SEXP _Batman_RVarBart(SEXP XSEXP, SEXP YSEXP, SEXP probsSEXP, SEXP sigma_scale_log_tauSEXP, SEXP shape_tau_0SEXP, SEXP rate_tau_0SEXP, SEXP num_treesSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP, SEXP update_scale_log_tauSEXP, SEXP update_sSEXP) {
@@ -491,6 +511,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_QMultinomBart", (DL_FUNC) &_Batman_QMultinomBart, 11},
     {"_Batman_QNBBart", (DL_FUNC) &_Batman_QNBBart, 10},
     {"_Batman_QPoisBart", (DL_FUNC) &_Batman_QPoisBart, 10},
+    {"_Batman_QPowerBart", (DL_FUNC) &_Batman_QPowerBart, 10},
     {"_Batman_RVarBart", (DL_FUNC) &_Batman_RVarBart, 12},
     {"_Batman_RegBart", (DL_FUNC) &_Batman_RegBart, 10},
     {"_Batman_doit", (DL_FUNC) &_Batman_doit, 0},

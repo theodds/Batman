@@ -23,14 +23,11 @@ QPowerParams(double scale_lambda_0_,
     p(p_){
   }
 
-  double get_alpha() const {return alpha;}
-  double get_beta() const {return beta;}
   double get_scale_lambda() const {return scale_lambda;}
   double get_phi() const {return phi;}
   double get_p() const {return p;}
   void set_scale_lambda(double x) {
     scale_lambda = x;
-    scale_lambda_to_ab();
   }
 
 };

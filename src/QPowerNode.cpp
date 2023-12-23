@@ -15,7 +15,7 @@ void QPowerNode::AddSuffStat(const QPowerData& data, int i, double phi, double p
   }
 }
 
-void QPowerNode::UpdateSuffStat(const QPowerData& data, double phi) {
+void QPowerNode::UpdateSuffStat(const QPowerData& data, double phi, double p) {
   ResetSuffStat();
   int N = data.X.n_rows;
   for(int i = 0; i < N; i++) {
@@ -66,7 +66,7 @@ double quasi_fisher(double A, double B, double lambda, double p, double phi) {
 }
 
 double LogLT(QPowerNode* root, const QPowerData& data) {
-  root->UpdateSuffStat(data, root->pois_params->get_phi());
+  root->UpdateSuffStat(data, root->pois_params->get_phi(), root->pois_params->get_p());
   std::vector<QPowerNode*> leafs = leaves(root);
 
   double out = 0.0;
@@ -82,7 +82,7 @@ double LogLT(QPowerNode* root, const QPowerData& data) {
     double B = leafs[i]->ss.B;
     double lambda_hat = log(A / B);
     double ell_hat = quasi_likelihood(A, B, lambda_hat, p, phi);
-    double fish_hat = quasi_fisher(A, B, lambda, p, phi);
+    double fish_hat = quasi_fisher(A, B, lambda_hat, p, phi);
     double fish_inv = 1. / fish_hat;
     out += ell_hat - 0.5 * pow(lambda_hat, 2) / (fish_inv + s_sq)
       + 0.5 * log(fish_inv) - 0.5 * log(s_sq + fish_inv);
@@ -91,7 +91,7 @@ double LogLT(QPowerNode* root, const QPowerData& data) {
 }
 
 void UpdateParams(QPowerNode* root, const QPowerData& data) {
-  root->UpdateSuffStat(data, root->pois_params->get_phi());
+  root->UpdateSuffStat(data, root->pois_params->get_phi(), root->pois_params->get_p());
   std::vector<QPowerNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
 
@@ -106,7 +106,7 @@ void UpdateParams(QPowerNode* root, const QPowerData& data) {
     double A = leafs[i]->ss.A;
     double B = leafs[i]->ss.B;
     double lambda_hat = log(A / B);
-    double fish_hat = quasi_fisher(A, B, lambda, p, phi);
+    double fish_hat = quasi_fisher(A, B, lambda_hat, p, phi);
     double fish_inv = 1. / fish_hat;
 
     double m_up = fish_hat * lambda_hat / (fish_hat + prec);

@@ -8,7 +8,7 @@ struct QPowerData {
   arma::vec Y;
   arma::vec lambda_hat;
 
-  QGammaData(const arma::mat& X_, const arma::vec& Y_) {
+  QPowerData(const arma::mat& X_, const arma::vec& Y_) {
     X = X_;
     Y = Y_;
     lambda_hat = arma::zeros<arma::vec>(X.n_rows);
