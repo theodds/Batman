@@ -3,6 +3,41 @@
 using namespace arma;
 using namespace Rcpp;
 
+void hessian_power(arma::vec& gradient,
+                   arma::mat& hessian,
+                   double p,
+                   double phi
+                   const arma::vec& omega,
+                   const QPowerData& data) {
+  int N    = data.Y.n_elem;
+  vec mu   = exp(data.Y.lambda_hat);
+
+  double D_phi = 0.;
+  double D_p = 0;
+  double D_phi_p = 0;
+  double g_phi = 0.;
+  double g_p = 0.;
+  
+  gradient = zeros<vec>(2);
+  hessian  = zeros<mat>(2,2);
+
+  for(int i = 0; i < N; i++) {
+    double R = pow(data.Y(i) - mu(i), 2) / pow(mu(i), p);
+    g_phi += omega(i) * (0.5 * R / phi / phi - 0.5 / phi);
+    g_p += omega(i) * (0.5 * p * R / phi / mu(i) - 0.5 * log(mu(i)));
+    D_phi += omega(i) * (0.5 / phi / phi - R / pow(phi,3));
+    D_p += omega(i) * (-0.5 * p * (p + 1) * R / phi / pow(mu(i), 2));
+    D_phi_p += omega(i) * (-0.5 * p * R / phi / phi / mu(i));
+  }
+
+  gradient(0) = g_phi;
+  gradient(1) = g_p;
+  hessian(0,0) = D_phi;
+  hessian(1,0) = D_phi_p;
+  hessian(0,1) = D_phi_p;
+  hessian(1,1) = D_p;
+}
+
 arma::vec PredictPois(std::vector<QPowerNode*>& forest, const arma::mat& X) {
   int N = forest.size();
   vec out = zeros<mat>(X.n_rows);
@@ -16,6 +51,7 @@ void UpdateHypers(QPowerParams& hypers, std::vector<QPowerNode*>& trees,
                   const QPowerData& data)
 {
   // UpdateSigmaMu(hypers, trees);
+  int NUM_NEWTON = 10;
 
   // Create the Bayesian bootstrap vector
   int N = data.X.n_rows;
@@ -28,20 +64,21 @@ void UpdateHypers(QPowerParams& hypers, std::vector<QPowerNode*>& trees,
     omega(i) = omega(i) / omega_sum;
   }
 
-//   // Create vector of means and Z's
-//   vec mu = zeros<vec>(N);
-//   vec Z = zeros<vec>(N);
-//   for(int i = 0; i < N; i++) {
-//     mu(i) = exp(-data.lambda_hat(i));
-//     Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), 2);
-//   }
+  // Initialize variables for Newton-Rhapson
+  vec phi_p = zeros<vec>(2);
+  phi_p(0) = hypers.phi;
+  phi_p(1) = hypers.p;
 
-//   // Update phi
-//   hypers.phi = sum(Z % omega);
-//   // Rcout << "hypers.phi = sum(Z % omega);" << "    " << hypers.phi << std::endl;
-//   // double phi_hat = sum(Z) / N;
-//   // hypers.phi = R::rgamma(0.5 * N, 2. * phi_hat / N);
+  vec gradient;
+  mat hessian;
+  
+  for(int i = 0; i < NUM_NEWTON; i++) {
+    hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
+    phi_p = phi_p - inv_sympd(hessian) * gradient;
+  }
 
+  hypers.phi = phi_p(0);
+  hypers.p = phi_p(1);f
 }
 
 // [[Rcpp::export]]
