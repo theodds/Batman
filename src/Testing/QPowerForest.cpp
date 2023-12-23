@@ -6,11 +6,11 @@ using namespace Rcpp;
 void hessian_power(arma::vec& gradient,
                    arma::mat& hessian,
                    double p,
-                   double phi,
+                   double phi
                    const arma::vec& omega,
                    const QPowerData& data) {
   int N    = data.Y.n_elem;
-  vec mu   = exp(data.lambda_hat);
+  vec mu   = exp(data.Y.lambda_hat);
 
   double D_phi = 0.;
   double D_p = 0;
@@ -64,70 +64,32 @@ void UpdateHypers(QPowerParams& hypers, std::vector<QPowerNode*>& trees,
     omega(i) = omega(i) / omega_sum;
   }
 
-  // Get mu
-  vec mu = exp(data.lambda_hat);
+  // Initialize variables for Newton-Rhapson
+  vec phi_p = zeros<vec>(2);
+  phi_p(0) = hypers.phi;
+  phi_p(1) = hypers.p;
+
+  vec gradient;
+  mat hessian;
   
-  // pseudo-likelihood update for phi
-  double p = hypers.p;
-  vec Z = zeros<vec>(N);
-
-  for(int k = 0; k < NUM_NEWTON; k++) {
-    for(int i = 0; i < N; i++) {
-      Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), p);
-    }
-    double phi_hat = sum(Z) / N;
-    double shape_phi = 0.5 * N;
-    double rate_phi = 0.5 * N * phi_hat;
-    double phi = 1.0 / R::rgamma(shape_phi, 1.0 / rate_phi);
-
-    // pseudo-likelihood update for p
-    double U = 2. * unif_rand() - 1.;
-    double p_prop = p * exp(0.1 * U);
-
-    double loglik_old = R::dnorm(log(p), 0., 1., 1);
-    double loglik_new = R::dnorm(log(p_prop), 0., 1., 1);
-    for(int i = 0; i < N; i++) {
-      loglik_old += R::dnorm(data.Y(i), mu(i), sqrt(phi * pow(mu(i), p)), 1);
-      loglik_new += R::dnorm(data.Y(i), mu(i), sqrt(phi * pow(mu(i), p_prop)), 1);
-    }
-    U = unif_rand();
-    p = log(U) < loglik_new - loglik_old ? p_prop : p;
-
-    hypers.phi = phi;
-    hypers.p = p;
+  for(int i = 0; i < NUM_NEWTON; i++) {
+    hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
+    phi_p = phi_p - solve(hessian) * gradient;
   }
-  
-  // // Initialize variables for Newton-Rhapson
-  // vec phi_p = zeros<vec>(2);
-  // phi_p(0) = hypers.phi;
-  // phi_p(1) = hypers.p;
 
-  // vec gradient;
-  // mat hessian;
-  
-  // for(int i = 0; i < NUM_NEWTON; i++) {
-  //   hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
-  //   Rcout << "hessian = " << std::endl << hessian << std::endl;
-  //   Rcout << "gradient = " << std::endl << gradient << std::endl;
-  //   phi_p = phi_p - solve(hessian, gradient);
-  //   if(phi_p(0) < 0) phi_p(0) = 0.00001;
-  //   if(phi_p(1) < 0) phi_p(1) = 0.00001;
-  //   Rcout << "phi_p = " << std::endl << phi_p << std::endl;
-  // }
-
-  // hypers.phi = phi_p(0);
-  // hypers.p = phi_p(1);
+  hypers.phi = phi_p(0);
+  hypers.p = phi_p(1);f
 }
 
 // [[Rcpp::export]]
 List QPowerBart(const arma::mat& X,
-                const arma::vec& Y,
-                const arma::mat& X_test,
-                const arma::sp_mat& probs,
-                int num_trees,
-                double scale_lambda,
-                double scale_lambda_0,
-                int num_burn, int num_thin, int num_save)
+              const arma::vec& Y,
+              const arma::mat& X_test,
+              const arma::sp_mat& probs,
+              int num_trees,
+              double scale_lambda,
+              double scale_lambda_0,
+              int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
   QPowerParams pois_params(scale_lambda_0, scale_lambda, 1.0, .9999);

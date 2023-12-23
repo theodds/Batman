@@ -1,15 +1,17 @@
 ## Load ----
 
 library(Batman)
-library(tidyverse)
 library(dbarts)
+library(tidyverse)
+
+rmse <- function(x,y) sqrt(mean(abs(x-y)^2))
 
 ## Generate data ----
 
-set.seed(999)
+# set.seed(999)
 
 P <- 10
-N <- 2500
+N <- 500
 num_tree <- 50
 
 probs <- Matrix::Matrix(diag(P))
@@ -38,7 +40,27 @@ Y <- train_data %>% pull(Y)
 
 ## Fit Model ----
 
-fitted_qgam <-
+fitted_qpower <-
+  QPowerBart(
+    X,
+    Y,
+    X,
+    probs,
+    50,
+    scale_lambda_0 = 1,
+    scale_lambda = 1 / sqrt(50),
+    num_burn = 1000,
+    num_thin = 1,
+    num_save = 1000
+  )
+
+par(mfrow = c(1,2))
+hist(fitted_qpower$p)
+hist(fitted_qpower$phi)
+
+## Comparing with qgamma ----
+
+fitted_qgamma <-
   QGammaBart(
     X,
     Y,
@@ -47,41 +69,32 @@ fitted_qgam <-
     50,
     scale_lambda_0 = 1,
     scale_lambda = 1 / sqrt(50),
-    num_burn = 3000,
+    num_burn = 1000,
     num_thin = 1,
-    num_save = 3000
+    num_save = 1000
   )
 
-## Comparing with dbarts ----
+## Plotting results ----
 
-fitted_dbart <-
-  bart(
-    x.train = X,
-    y.train = Y,
-    x.test = X,
-    ntree = 50,
-    nskip = 3000,
-    ndpost = 3000
-  )
+par(mfrow = c(1,2))
 
-## Checking output ----
+mu_hat_qgam <- -fitted_qgamma$lambda %>% exp() %>% colMeans()
+mu_hat_qpow <- fitted_qpower$lambda %>% exp() %>% colMeans()
+mu_0 <- train_data$mu
 
-par(mfrow = c(3,3))
-plot(colMeans(exp(-fitted_qgam$lambda)), train_data$mu)
-abline(a=0, b=1, lwd = 3, lty = 2, col = 2)
-hist(fitted_qgam$phi)
-plot(fitted_dbart$yhat.test.mean, train_data$mu)
-abline(a=0, b=1, lwd = 3, lty = 2, col = 2)
-hist(fitted_dbart$sigma)
-plot(fitted_qgam$phi, type = 'l')
-plot(colMeans(fitted_qgam$counts > 0), ylim = c(0,1))
+rmse(mu_0, mu_hat_qgam)
+rmse(mu_0, mu_hat_qpow)
 
-abs_errors <- abs(colMeans(exp(-fitted_qgam$lambda)) - train_data$mu)^2
-abs_errors_db <- abs(fitted_dbart$yhat.test.mean - train_data$mu)^2
-plot(density(abs_errors))
-lines(density(abs_errors_db))
-plot(fitted_qgam$counts[,1])
-plot(fitted_qgam$counts[,2])
+plot(mu_hat_qgam, mu_0)
+plot(mu_hat_qpow, mu_0)
 
-mean(abs_errors) / mean(abs_errors_db)
+# fitted_dbart <-
+#   bart(
+#     x.train = X,
+#     y.train = Y,
+#     x.test = X,
+#     ntree = 50,
+#     nskip = 3000,
+#     ndpost = 3000
+#   )
 
