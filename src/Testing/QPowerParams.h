@@ -7,6 +7,7 @@
 struct QPowerParams {
 
   double scale_lambda_0;
+  double scale_lambda;
   double sigma_scale_lambda;
   double phi;
   double p;
@@ -20,7 +21,6 @@ QPowerParams(double scale_lambda_0_,
     sigma_scale_lambda(scale_lambda_),
     scale_lambda_0(scale_lambda_0_),
     p(p_){
-    scale_lambda_to_ab();
   }
 
   double get_alpha() const {return alpha;}
@@ -33,15 +33,6 @@ QPowerParams(double scale_lambda_0_,
     scale_lambda_to_ab();
   }
 
-private:
-
-  double scale_lambda;
-  double alpha;
-  double beta;
-
-  void scale_lambda_to_ab() {
-    scale_lambda_to_alpha_beta(alpha, beta, scale_lambda);
-  }
 };
 
 
