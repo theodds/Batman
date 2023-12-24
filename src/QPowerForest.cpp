@@ -22,12 +22,16 @@ void hessian_power(arma::vec& gradient,
   hessian  = zeros<mat>(2,2);
 
   for(int i = 0; i < N; i++) {
+    double lambda = data.lambda_hat(i);
     double R = pow(data.Y(i) - mu(i), 2) / pow(mu(i), p);
     g_phi += omega(i) * (0.5 * R / phi / phi - 0.5 / phi);
-    g_p += omega(i) * (0.5 * p * R / phi / mu(i) - 0.5 * log(mu(i)));
-    D_phi += omega(i) * (0.5 / phi / phi - R / pow(phi,3));
-    D_p += omega(i) * (-0.5 * p * (p + 1) * R / phi / pow(mu(i), 2));
-    D_phi_p += omega(i) * (-0.5 * p * R / phi / phi / mu(i));
+    g_p += omega(i) * (- 0.5 * lambda + 0.5 * lambda * R / phi);
+    // D_phi += omega(i) * (0.5 / phi / phi - R / pow(phi, 3));
+    // D_p += omega(i) * (-0.5 * lambda * lambda * R / phi);
+    // D_phi_p += omega(i) * (-0.5 * lambda * R / phi / phi);
+    D_phi += -0.5 * omega(i) / phi / phi;
+    D_p += -0.5 * omega(i) * lambda * lambda;
+    D_phi_p += -0.5 * omega(i) * lambda / phi;
   }
 
   gradient(0) = g_phi;
@@ -97,26 +101,32 @@ void UpdateHypers(QPowerParams& hypers, std::vector<QPowerNode*>& trees,
     hypers.p = p;
   }
   
-  // // Initialize variables for Newton-Rhapson
-  // vec phi_p = zeros<vec>(2);
-  // phi_p(0) = hypers.phi;
-  // phi_p(1) = hypers.p;
-
-  // vec gradient;
-  // mat hessian;
+  // Initialize variables for Newton-Rhapson
+  vec phi_p = zeros<vec>(2);
+  phi_p(0) = hypers.phi;
+  phi_p(1) = hypers.p;
   
-  // for(int i = 0; i < NUM_NEWTON; i++) {
-  //   hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
-  //   Rcout << "hessian = " << std::endl << hessian << std::endl;
-  //   Rcout << "gradient = " << std::endl << gradient << std::endl;
-  //   phi_p = phi_p - solve(hessian, gradient);
-  //   if(phi_p(0) < 0) phi_p(0) = 0.00001;
-  //   if(phi_p(1) < 0) phi_p(1) = 0.00001;
-  //   Rcout << "phi_p = " << std::endl << phi_p << std::endl;
-  // }
+  for(int i = 0; i < N; i++) {
+    Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), p);
+  }
+  phi_p(0) = sum(omega % Z);
 
-  // hypers.phi = phi_p(0);
-  // hypers.p = phi_p(1);
+  vec gradient;
+  mat hessian;
+  
+  for(int i = 0; i < NUM_NEWTON; i++) {
+    hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
+    // hessian_power(gradient, hessian, phi_p(1), phi_p(0), ones<vec>(N) / N, data);
+    // Rcout << "hessian = " << std::endl << hessian << std::endl;
+    // Rcout << "gradient = " << std::endl << gradient << std::endl;
+    phi_p = phi_p - inv_sympd(hessian) * gradient;
+    if(phi_p(0) < 0) phi_p(0) = 0.00001;
+    if(phi_p(1) < 0) phi_p(1) = 0.00001;
+    // Rcout << "phi_p = " << std::endl << phi_p << std::endl;
+  }
+
+  hypers.phi = phi_p(0);
+  hypers.p = phi_p(1);
 }
 
 // [[Rcpp::export]]
