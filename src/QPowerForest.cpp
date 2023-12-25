@@ -101,32 +101,28 @@ void UpdateHypers(QPowerParams& hypers, std::vector<QPowerNode*>& trees,
     hypers.p = p;
   }
   
-  // Initialize variables for Newton-Rhapson
-  vec phi_p = zeros<vec>(2);
-  phi_p(0) = hypers.phi;
-  phi_p(1) = hypers.p;
+  // // Initialize variables for Newton-Rhapson
+  // vec phi_p = zeros<vec>(2);
+  // phi_p(0) = hypers.phi;
+  // phi_p(1) = hypers.p;
   
-  for(int i = 0; i < N; i++) {
-    Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), p);
-  }
-  phi_p(0) = sum(omega % Z);
+  // for(int i = 0; i < N; i++) {
+  //   Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), p);
+  // }
+  // phi_p(0) = sum(omega % Z);
 
-  vec gradient;
-  mat hessian;
+  // vec gradient;
+  // mat hessian;
   
-  for(int i = 0; i < NUM_NEWTON; i++) {
-    hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
-    // hessian_power(gradient, hessian, phi_p(1), phi_p(0), ones<vec>(N) / N, data);
-    // Rcout << "hessian = " << std::endl << hessian << std::endl;
-    // Rcout << "gradient = " << std::endl << gradient << std::endl;
-    phi_p = phi_p - inv_sympd(hessian) * gradient;
-    if(phi_p(0) < 0) phi_p(0) = 0.00001;
-    if(phi_p(1) < 0) phi_p(1) = 0.00001;
-    // Rcout << "phi_p = " << std::endl << phi_p << std::endl;
-  }
+  // for(int i = 0; i < NUM_NEWTON; i++) {
+  //   hessian_power(gradient, hessian, phi_p(1), phi_p(0), omega, data);
+  //   phi_p = phi_p - inv_sympd(hessian) * gradient;
+  //   if(phi_p(0) < 0) phi_p(0) = 0.00001;
+  //   if(phi_p(1) < 0) phi_p(1) = 0.00001;
+  // }
 
-  hypers.phi = phi_p(0);
-  hypers.p = phi_p(1);
+  // hypers.phi = phi_p(0);
+  // hypers.p = phi_p(1);
 }
 
 // [[Rcpp::export]]
