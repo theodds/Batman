@@ -35,7 +35,7 @@ sim_fried_gamma <- function(N, P, phi = 0.5) {
 train_data <- sim_fried_gamma(N, P)
 qplot(mu, Y, data = train_data)
 
-X <- train_data %>% select(-Y, -mu) %>% as.matrix()
+X <- train_data %>% dplyr::select(-Y, -mu) %>% as.matrix()
 Y <- train_data %>% pull(Y)
 
 ## Fit Model ----
@@ -54,9 +54,10 @@ fitted_qpower <-
     num_save = 1000
   )
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,3))
 hist(fitted_qpower$p)
 hist(fitted_qpower$phi)
+plot(rowSums(fitted_qpower$counts))
 
 ## Comparing with qgamma ----
 

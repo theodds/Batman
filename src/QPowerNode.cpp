@@ -80,12 +80,14 @@ double LogLT(QPowerNode* root, const QPowerData& data) {
   for(int i = 0; i < num_leaves; i++) {
     double A = leafs[i]->ss.A;
     double B = leafs[i]->ss.B;
-    double lambda_hat = log(A / B);
-    double ell_hat = quasi_likelihood(A, B, lambda_hat, p, phi);
-    double fish_hat = quasi_fisher(A, B, lambda_hat, p, phi);
-    double fish_inv = 1. / fish_hat;
-    out += ell_hat - 0.5 * pow(lambda_hat, 2) / (fish_inv + s_sq)
-      + 0.5 * log(fish_inv) - 0.5 * log(s_sq + fish_inv);
+    if(A != 0.) {
+      double lambda_hat = log(A / B);
+      double ell_hat = quasi_likelihood(A, B, lambda_hat, p, phi);
+      double fish_hat = quasi_fisher(A, B, lambda_hat, p, phi);
+      double fish_inv = 1. / fish_hat;
+      out += ell_hat - 0.5 * pow(lambda_hat, 2) / (fish_inv + s_sq)
+        + 0.5 * log(fish_inv) - 0.5 * log(s_sq + fish_inv);
+    }
   }
   return out;
 }
@@ -102,16 +104,20 @@ void UpdateParams(QPowerNode* root, const QPowerData& data) {
   double prec = 1./s_sq;
 
   for(int i = 0; i < num_leaves; i++) {
-
     double A = leafs[i]->ss.A;
     double B = leafs[i]->ss.B;
-    double lambda_hat = log(A / B);
-    double fish_hat = quasi_fisher(A, B, lambda_hat, p, phi);
-    double fish_inv = 1. / fish_hat;
+    if(A != 0.) {
+      double lambda_hat = log(A / B);
+      double fish_hat = quasi_fisher(A, B, lambda_hat, p, phi);
+      double fish_inv = 1. / fish_hat;
 
-    double m_up = fish_hat * lambda_hat / (fish_hat + prec);
-    double v_up = 1. / (fish_hat + prec);
-    double s_up = sqrt(v_up);
-    leafs[i]->lambda = m_up + s_up * norm_rand();
+      double m_up = fish_hat * lambda_hat / (fish_hat + prec);
+      double v_up = 1. / (fish_hat + prec);
+      double s_up = sqrt(v_up);
+      leafs[i]->lambda = m_up + s_up * norm_rand();
+    }
+    else {
+      leafs[i]->lambda = s * norm_rand();
+    }
   }
 }
