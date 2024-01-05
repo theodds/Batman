@@ -15,33 +15,41 @@ arma::vec PredictPois(std::vector<GammaNode*>& forest, const arma::mat& X) {
 void UpdateHypers(GammaParams& hypers, std::vector<GammaNode*>& trees,
                   const GammaData& data)
 {
-  // UpdateSigmaMu(hypers, trees);
+  int N = data.Y.n_elem;
 
-  // Create the Bayesian bootstrap vector
-  int N = data.X.n_rows;
-  vec omega = zeros<vec>(N);
-  for(int i = 0; i < N; i++) {
-    omega(i) = R::rexp(1.0);
-  }
-  double omega_sum = sum(omega);
-  for(int i = 0; i < N; i++) {
-    omega(i) = omega(i) / omega_sum;
-  }
-
-  // Create vector of means and Z's
+  // Create vector of means and Z's and compute phi_hat
   vec mu = zeros<vec>(N);
   vec Z = zeros<vec>(N);
   for(int i = 0; i < N; i++) {
     mu(i) = exp(-data.lambda_hat(i));
     Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), 2);
   }
+  
+  double phi_hat = mean(Z);
+  
+  // Get alpha and an approximation of its standard deviation
+  double alpha = 1.0 / hypers.phi;
+  double sigma_alpha = 1.0 / phi_hat * sqrt(2.0 / N);
+  
+  // Get sufficient statistics
+  double S = sum(log(Y / mu));
+  double R = sum(Y / mu);
 
-  // Update phi
-  hypers.phi = sum(Z % omega);
-  // Rcout << "hypers.phi = sum(Z % omega);" << "    " << hypers.phi << std::endl;
-  // double phi_hat = sum(Z) / N;
-  // hypers.phi = R::rgamma(0.5 * N, 2. * phi_hat / N);
+  // Get original likelihood
+  double loglik_old = N * alpha * log(alpha) + alpha * (S - R) - 
+    N * R::lgamma(alpha);
+  
+  for(int k = 0; k < 10; k++) {
+    double alpha_prop = alpha + (2. * unif_rand() - 1) * sigma_alpha;
+    if(alpha_prop < 0) continue;
+    
+    double loglik_new = N * alpha_prop * log(alpha_prop) 
+      + alpha_prop * (S - R) - N * R::lgamma(alpha_prop);
+    
+    alpha = unif_rand() < loglik_new - loglik_old ? alpha_prop : alpha;
+  }
 
+  hypers.phi = 1.0 / alpha;
 }
 
 // [[Rcpp::export]]
