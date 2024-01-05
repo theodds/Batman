@@ -1,16 +1,16 @@
-#ifndef QGamma_PARAMS_H
-#define QGamma_PARAMS_H
+#ifndef Gamma_PARAMS_H
+#define Gamma_PARAMS_H
 
 #include <RcppArmadillo.h>
 #include "Node.h"
 
-struct QGammaParams {
+struct GammaParams {
 
   double scale_lambda_0;
   double sigma_scale_lambda;
   double phi;
 
-  QGammaParams(double scale_lambda_0_, double scale_lambda_, double phi_) :
+  GammaParams(double scale_lambda_0_, double scale_lambda_, double phi_) :
     scale_lambda(scale_lambda_), 
     phi(phi_),
     sigma_scale_lambda(scale_lambda_),

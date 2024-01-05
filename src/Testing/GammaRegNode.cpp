@@ -1,9 +1,9 @@
-#include "QGammaNode.h"
+#include "GammaRegNode.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-void QGammaNode::AddSuffStat(const QGammaData& data, int i, double phi) {
+void GammaNode::AddSuffStat(const GammaData& data, int i, double phi) {
   ss.Increment(data.Y(i), data.lambda_hat(i), phi);
   if(!is_leaf) {
     double x = data.X(i,var);
@@ -15,7 +15,7 @@ void QGammaNode::AddSuffStat(const QGammaData& data, int i, double phi) {
   }
 }
 
-void QGammaNode::UpdateSuffStat(const QGammaData& data, double phi) {
+void GammaNode::UpdateSuffStat(const GammaData& data, double phi) {
   ResetSuffStat();
   int N = data.X.n_rows;
   for(int i = 0; i < N; i++) {
@@ -23,7 +23,7 @@ void QGammaNode::UpdateSuffStat(const QGammaData& data, double phi) {
   }
 }
 
-double PredictPois(QGammaNode* n, const rowvec& x) {
+double PredictPois(GammaNode* n, const rowvec& x) {
   if(n->is_leaf) {
     return n->lambda;
   }
@@ -35,7 +35,7 @@ double PredictPois(QGammaNode* n, const rowvec& x) {
   }
 }
 
-arma::vec PredictPois(QGammaNode* tree, const arma::mat& X) {
+arma::vec PredictPois(GammaNode* tree, const arma::mat& X) {
   int N = X.n_rows;
   vec out = zeros<vec>(N);
   for(int i = 0; i < N; i++) {
@@ -45,19 +45,19 @@ arma::vec PredictPois(QGammaNode* tree, const arma::mat& X) {
   return out;
 }
 
-void BackFit(QGammaData& data, QGammaNode* tree) {
+void BackFit(GammaData& data, GammaNode* tree) {
   vec lambda = PredictPois(tree, data.X);
   data.lambda_hat = data.lambda_hat - lambda;
 }
 
-void Refit(QGammaData& data, QGammaNode* tree) {
+void Refit(GammaData& data, GammaNode* tree) {
   vec lambda = PredictPois(tree, data.X);
   data.lambda_hat = data.lambda_hat + lambda;
 }
 
-double LogLT(QGammaNode* root, const QGammaData& data) {
+double LogLT(GammaNode* root, const GammaData& data) {
   root->UpdateSuffStat(data, root->pois_params->get_phi());
-  std::vector<QGammaNode*> leafs = leaves(root);
+  std::vector<GammaNode*> leafs = leaves(root);
 
   double out = 0.0;
   int num_leaves = leafs.size();
@@ -76,9 +76,9 @@ double LogLT(QGammaNode* root, const QGammaData& data) {
   return out;
 }
 
-void UpdateParams(QGammaNode* root, const QGammaData& data) {
+void UpdateParams(GammaNode* root, const GammaData& data) {
   root->UpdateSuffStat(data, root->pois_params->get_phi());
-  std::vector<QGammaNode*> leafs = leaves(root);
+  std::vector<GammaNode*> leafs = leaves(root);
   int num_leaves = leafs.size();
   for(int i = 0; i < num_leaves; i++) {
     double sum_1_by_phi = leafs[i]->ss.sum_1_by_phi;

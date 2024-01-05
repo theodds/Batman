@@ -1,13 +1,13 @@
-#ifndef QGAMMA_SS_H
-#define QGAMMA_SS_H
+#ifndef GAMMA_SS_H
+#define GAMMA_SS_H
 
 #include <RcppArmadillo.h>
 
-struct QGammaSuffStats {
+struct GammaSuffStats {
   double sum_1_by_phi;
   double sum_exp_lambda_minus_y;
 
-  QGammaSuffStats() {
+  GammaSuffStats() {
     Reset();
   }
 

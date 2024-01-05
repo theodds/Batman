@@ -1,9 +1,9 @@
-#include "QGammaForest.h"
+#include "GammaRegForest.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-arma::vec PredictPois(std::vector<QGammaNode*>& forest, const arma::mat& X) {
+arma::vec PredictPois(std::vector<GammaNode*>& forest, const arma::mat& X) {
   int N = forest.size();
   vec out = zeros<mat>(X.n_rows);
   for(int n = 0; n < N; n++) {
@@ -12,8 +12,8 @@ arma::vec PredictPois(std::vector<QGammaNode*>& forest, const arma::mat& X) {
   return out;
 }
 
-void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
-                  const QGammaData& data)
+void UpdateHypers(GammaParams& hypers, std::vector<GammaNode*>& trees,
+                  const GammaData& data)
 {
   // UpdateSigmaMu(hypers, trees);
 
@@ -45,19 +45,19 @@ void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
 }
 
 // [[Rcpp::export]]
-List QGammaBart(const arma::mat& X,
-              const arma::vec& Y,
-              const arma::mat& X_test,
-              const arma::sp_mat& probs,
-              int num_trees,
-              double scale_lambda,
-              double scale_lambda_0,
-              int num_burn, int num_thin, int num_save)
+List GammaRegBart(const arma::mat& X,
+                  const arma::vec& Y,
+                  const arma::mat& X_test,
+                  const arma::sp_mat& probs,
+                  int num_trees,
+                  double scale_lambda,
+                  double scale_lambda_0,
+                  int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  QGammaParams pois_params(scale_lambda_0, scale_lambda, 1.0);
-  QGammaForest forest(num_trees, &tree_hypers, &pois_params);
-  QGammaData data(X,Y);
+  GammaParams pois_params(scale_lambda_0, scale_lambda, 1.0);
+  GammaForest forest(num_trees, &tree_hypers, &pois_params);
+  GammaData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());
   mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
   umat counts = zeros<umat>(num_save, probs.n_cols);
@@ -86,6 +86,7 @@ List QGammaBart(const arma::mat& X,
   out["lambda_test"] = lambda_test;
   out["counts"] = counts;
   out["phi"] = phi;
+  out["alpha"] = 1 / phi;
 
   return out;
 }
