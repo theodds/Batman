@@ -32,19 +32,19 @@ void UpdateHypers(GammaParams& hypers, std::vector<GammaNode*>& trees,
   double sigma_alpha = 1.0 / phi_hat * sqrt(2.0 / N);
   
   // Get sufficient statistics
-  double S = sum(log(Y / mu));
-  double R = sum(Y / mu);
+  double S = sum(log(data.Y / mu));
+  double R = sum(data.Y / mu);
 
   // Get original likelihood
   double loglik_old = N * alpha * log(alpha) + alpha * (S - R) - 
-    N * R::lgamma(alpha);
+    N * R::lgammafn(alpha);
   
   for(int k = 0; k < 10; k++) {
     double alpha_prop = alpha + (2. * unif_rand() - 1) * sigma_alpha;
     if(alpha_prop < 0) continue;
     
     double loglik_new = N * alpha_prop * log(alpha_prop) 
-      + alpha_prop * (S - R) - N * R::lgamma(alpha_prop);
+      + alpha_prop * (S - R) - N * R::lgammafn(alpha_prop);
     
     alpha = unif_rand() < loglik_new - loglik_old ? alpha_prop : alpha;
   }

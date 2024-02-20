@@ -4,7 +4,7 @@
 #include <RcppArmadillo.h>
 #include "Node.h"
 #include "GammaRegParams.h"
-#include "GammaRrgData.h"
+#include "GammaRegData.h"
 #include "GammaRegSS.h"
 
 struct GammaNode : public Node<GammaNode> {
