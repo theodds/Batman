@@ -471,3 +471,15 @@ double gamma_gamma_shape_update(const arma::vec& tau,
 
 }
 
+// [[Rcpp::export]]
+std::vector<std::vector<int>> convertListToVector(Rcpp::List list) {
+  std::vector<std::vector<int>> result;
+  
+  for(int i = 0; i < list.size(); ++i) {
+    Rcpp::IntegerVector vec = list[i];
+    std::vector<int> stdVec = Rcpp::as<std::vector<int>>(vec);
+    result.push_back(stdVec);
+  }
+  
+  return result;
+}

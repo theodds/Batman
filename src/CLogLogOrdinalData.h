@@ -9,7 +9,7 @@ struct CLogLogOrdinalData {
   arma::vec Z;
   arma::vec lambda_hat;
 
-  CLogLogOrdinalData(const arma::mat& X_, const arma::vec& Y_) {
+  CLogLogOrdinalData(const arma::mat& X_, const arma::uvec& Y_) {
     X = X_;
     Y = Y_;
     Z = arma::ones<arma::vec>(X.n_rows);

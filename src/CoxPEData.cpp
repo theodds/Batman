@@ -47,7 +47,7 @@ void CoxPEData::UpdateBase() {
   for(int k = 0; k < K; k++) {
     double alpha_k = num_fail(k);
     double beta_k  = bin_width(k) * R(k) + Gk(k);
-    base_haz(k) = R::rgamma(alpha_k + 0.00001, 1.0  / beta_k + 0.00001);
+    base_haz(k) = R::rgamma(alpha_k + shape_haz, 1.0  / (beta_k + rate_haz));
   }
 
   // Do the update for the cumulative hazard
@@ -80,6 +80,28 @@ void CoxPEData::UpdateBase() {
   //     + delta(i) * lambda_hat(i) 
   //     - r(i) * cum_base_haz_Y(i);
   // }
+  
+  // Update Shape Hazard
+  // double log_shape_old = log(shape_haz);
+  // double U = 0.5 * unif_rand() - 0.5;
+  // double log_shape_new = log_shape_old + U;
+  // double shape_new = exp(log_shape_new);
+  // double sum_log_lambda = sum(log(base_haz));
+  // double sum_lambda = sum(base_haz);
+  // double loglik_old = (shape_haz - 1) * sum_log_lambda
+  //  - base_haz.n_elem * R::lgammafn(shape_haz)
+  //   + R::lgammafn(base_haz.n_elem * shape_haz)
+  //   - base_haz.n_elem * shape_haz * log(sum_lambda);
+  // double loglik_new = (shape_new - 1) * sum_log_lambda
+  //   - base_haz.n_elem * R::lgammafn(shape_new)
+  //   + R::lgammafn(base_haz.n_elem * shape_new)
+  //   - base_haz.n_elem * shape_new * log(sum_lambda);
+  //   shape_haz = log(unif_rand()) < loglik_new - loglik_old ? shape_new : shape_haz;
+  double sum_lambda = sum(base_haz);
+  shape_haz = 1;
+    
+  // Update Rate Hazard
+  rate_haz = R::rgamma(base_haz.n_elem * shape_haz, 1.0 / (sum_lambda));
   
   // Rcout << "R: " << R << std::endl;
   // Rcout << "G: " << Gk << std::endl;

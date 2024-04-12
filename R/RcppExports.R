@@ -5,12 +5,16 @@ Batman <- function(X, Y, probs, num_cat, num_tree, scale_lambda, shape_lambda_0,
     .Call(`_Batman_Batman`, X, Y, probs, num_cat, num_tree, scale_lambda, shape_lambda_0, rate_lambda_0, scale_kappa, sigma_scale_log_tau, shape_tau_0, rate_tau_0, num_burn, num_thin, num_save, X_test, Y_test)
 }
 
+CLogLogOrdinalBart <- function(X, Y, num_levels, X_test, probs, num_trees, scale_lambda, alpha_gamma, beta_gamma, gamma_0, num_burn, num_thin, num_save) {
+    .Call(`_Batman_CLogLogOrdinalBart`, X, Y, num_levels, X_test, probs, num_trees, scale_lambda, alpha_gamma, beta_gamma, gamma_0, num_burn, num_thin, num_save)
+}
+
 CoxBart <- function(X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save) {
     .Call(`_Batman_CoxBart`, X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save)
 }
 
-convertListToVector <- function(list) {
-    .Call(`_Batman_convertListToVector`, list)
+CoxNPHBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save) {
+    .Call(`_Batman_CoxNPHBart`, X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save)
 }
 
 CoxPEBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save) {
@@ -95,6 +99,10 @@ trigamma_inverse <- function(x) {
 
 gamma_gamma_shape_update <- function(tau, mu, alpha, beta) {
     .Call(`_Batman_gamma_gamma_shape_update`, tau, mu, alpha, beta)
+}
+
+convertListToVector <- function(list) {
+    .Call(`_Batman_convertListToVector`, list)
 }
 
 rcpparma_hello_world <- function() {

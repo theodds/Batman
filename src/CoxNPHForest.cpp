@@ -1,20 +1,20 @@
-#include "CoxPEForest.h"
+#include "CoxNPHForest.h"
 
 using namespace arma;
 using namespace Rcpp;
 
-arma::vec PredictCox(std::vector<CoxPENode*>& forest, const arma::mat& X) {
+arma::mat PredictCox(std::vector<CoxNPHNode*>& forest, const arma::mat& X, int num_bin) {
   int T = forest.size();
-  vec out = zeros<vec>(X.n_rows);
+  mat out = zeros<mat>(X.n_rows, num_bin);
   for(int t = 0; t < T; t++) {
-    out = out + PredictCox(forest[t], X);
+    out = out + PredictCox(forest[t], X, num_bin);
   }
   return out;
 }
 
-void UpdateHypers(CoxPEParams& cox_params,
-                  std::vector<CoxPENode*>& trees,
-                  CoxPEData& data)
+void UpdateHypers(CoxNPHParams& cox_params,
+                  std::vector<CoxNPHNode*>& trees,
+                  CoxNPHData& data)
 {
 
   data.UpdateBase();
@@ -24,12 +24,12 @@ void UpdateHypers(CoxPEParams& cox_params,
     get_params(trees[i], lambda);
   }
 
-  UpdateScaleLambda(cox_params, lambda);
+  // UpdateScaleLambda(cox_params, lambda);
 }
 
 
 
-void get_params(CoxPENode* n, std::vector<double>& lambda)
+void get_params(CoxNPHNode* n, std::vector<double>& lambda)
 {
   if(n->is_leaf) {
     lambda.push_back(n->lambda);
@@ -40,7 +40,7 @@ void get_params(CoxPENode* n, std::vector<double>& lambda)
   }
 }
 
-void UpdateScaleLambda(CoxPEParams& cox_params, std::vector<double>& lambda)
+void UpdateScaleLambda(CoxNPHParams& cox_params, std::vector<double>& lambda)
 {
   double n = (double)lambda.size();
   double sum_lambda = 0.;
@@ -60,7 +60,7 @@ void UpdateScaleLambda(CoxPEParams& cox_params, std::vector<double>& lambda)
 }
 
 // [[Rcpp::export]]
-List CoxPEBart(const arma::mat& X,
+List CoxNPHBart(const arma::mat& X,
                const arma::vec& Y,
                const arma::uvec& delta,
                Rcpp::List bin_to_obs_list,
@@ -79,18 +79,18 @@ List CoxPEBart(const arma::mat& X,
   std::vector<std::vector<int>> bin_to_obs 
     = convertListToVector(bin_to_obs_list);
   vec pop_haz = do_rel_surv ? pop_haz_ : zeros<vec>(Y.n_elem);
+  int num_bin = base_haz_init.n_elem;
   
   TreeHypers tree_hypers(probs);
-  CoxPEParams cox_params(scale_lambda, scale_lambda);
-  CoxPEForest forest(num_trees, &tree_hypers, &cox_params);
-  CoxPEData data(X, Y, delta, bin_to_obs, obs_to_bin, time_grid,
-               bin_width, base_haz_init, pop_haz);
-  mat lambda_test = zeros<mat>(num_save, X_test.n_rows);
-  mat lambda_train = zeros<mat>(num_save, X.n_rows);
+  CoxNPHParams cox_params(scale_lambda, scale_lambda);
+  CoxNPHForest forest(num_trees, &tree_hypers, &cox_params);
+  CoxNPHData data(X, Y, delta, bin_to_obs, obs_to_bin, time_grid,
+                  bin_width, base_haz_init, pop_haz);
+  cube lambda_test = zeros<cube>(X_test.n_rows, num_bin, num_save);
+  cube lambda_train = zeros<cube>(X.n_rows, num_bin, num_save);
   mat base_haz = zeros<mat>(num_save, bin_width.n_elem);
-  mat cum_base_haz = zeros<mat>(num_save, bin_width.n_elem);
   umat counts = zeros<umat>(num_save, probs.n_cols);
-  vec loglik = zeros<vec>(num_save);
+//   vec loglik = zeros<vec>(num_save);
   vec sigma_lambda = zeros<vec>(num_save);
   vec shape_haz = zeros<vec>(num_save);
   vec rate_haz = zeros<vec>(num_save);
@@ -110,26 +110,26 @@ List CoxPEBart(const arma::mat& X,
     if((iter+1) % 100 == 0) {
       Rcout << "\rFinishing save " << iter+1 << "\t\t\t\t";
     }
-    lambda_test.row(iter) = trans(PredictCox(forest.trees, X_test));
-    lambda_train.row(iter) = trans(data.lambda_hat);
+    lambda_test.slice(iter) = PredictCox(forest.trees, X_test, num_bin);
+    lambda_train.slice(iter) = data.lambda_hat;
     base_haz.row(iter) = trans(data.base_haz);
-    cum_base_haz.row(iter) = trans(data.cum_base_haz);
+//     cum_base_haz.row(iter) = trans(data.cum_base_haz);
     counts.row(iter) = trans(get_var_counts(forest.trees));
     sigma_lambda(iter) = cox_params.get_scale_lambda();
     shape_haz(iter) = data.shape_haz;
     rate_haz(iter) = data.rate_haz;
 
-    loglik(iter) = data.loglik;
+//     loglik(iter) = data.loglik;
   }
 
   List out;
   out["lambda_test"] = lambda_test;
   out["lambda_train"] = lambda_train;
   out["hazard"] = base_haz;
-  out["cum_hazard"] = cum_base_haz;
+//   out["cum_hazard"] = cum_base_haz;
   out["counts"] = counts;
   out["sigma_lambda"] = sigma_lambda;
-  out["loglik"] = loglik;
+  // out["loglik"] = loglik;
   out["shape_haz"] = shape_haz;
   out["rate_haz"] = rate_haz;
   return out;

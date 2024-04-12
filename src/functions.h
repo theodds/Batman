@@ -108,4 +108,7 @@ arma::uvec update_gmm_class(const arma::vec& obs,
 double gamma_gamma_shape_update(const arma::vec& tau, double mu,
                                 double alpha, double beta);
 
+
+std::vector<std::vector<int>> convertListToVector(Rcpp::List list);
+
 #endif
