@@ -17,6 +17,10 @@ CoxNPHBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_
     .Call(`_Batman_CoxNPHBart`, X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save)
 }
 
+CoxNPHOBart <- function(X, Y, bin_to_obs_list, probs, X_test, num_trees, scale_lambda, shape_gamma, rate_gamma, num_burn, num_thin, num_save) {
+    .Call(`_Batman_CoxNPHOBart`, X, Y, bin_to_obs_list, probs, X_test, num_trees, scale_lambda, shape_gamma, rate_gamma, num_burn, num_thin, num_save)
+}
+
 CoxPEBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save) {
     .Call(`_Batman_CoxPEBart`, X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save)
 }

@@ -16,7 +16,7 @@ struct CoxNPHOData {
   arma::mat lambda_hat; // The lambdas, given by output of function
   double loglik;
   
-  /CoxNPHOData(const arma::mat& X_,
+  CoxNPHOData(const arma::mat& X_,
              const arma::vec& Y_,
              std::vector<std::vector<int>> bin_to_obs_
              ) {

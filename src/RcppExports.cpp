@@ -111,6 +111,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// CoxNPHOBart
+List CoxNPHOBart(const arma::mat& X, const arma::vec& Y, Rcpp::List bin_to_obs_list, const arma::sp_mat& probs, const arma::mat& X_test, int num_trees, double scale_lambda, double shape_gamma, double rate_gamma, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_CoxNPHOBart(SEXP XSEXP, SEXP YSEXP, SEXP bin_to_obs_listSEXP, SEXP probsSEXP, SEXP X_testSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP shape_gammaSEXP, SEXP rate_gammaSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type bin_to_obs_list(bin_to_obs_listSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type probs(probsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X_test(X_testSEXP);
+    Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
+    Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type shape_gamma(shape_gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type rate_gamma(rate_gammaSEXP);
+    Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
+    Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
+    Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
+    rcpp_result_gen = Rcpp::wrap(CoxNPHOBart(X, Y, bin_to_obs_list, probs, X_test, num_trees, scale_lambda, shape_gamma, rate_gamma, num_burn, num_thin, num_save));
+    return rcpp_result_gen;
+END_RCPP
+}
 // CoxPEBart
 List CoxPEBart(const arma::mat& X, const arma::vec& Y, const arma::uvec& delta, Rcpp::List bin_to_obs_list, const arma::uvec& obs_to_bin, const arma::vec& time_grid, const arma::vec& bin_width, const arma::vec& base_haz_init, const arma::sp_mat& probs, const arma::mat& X_test, int num_trees, double scale_lambda, bool do_rel_surv, const arma::vec& pop_haz_, int num_burn, int num_thin, int num_save);
 RcppExport SEXP _Batman_CoxPEBart(SEXP XSEXP, SEXP YSEXP, SEXP deltaSEXP, SEXP bin_to_obs_listSEXP, SEXP obs_to_binSEXP, SEXP time_gridSEXP, SEXP bin_widthSEXP, SEXP base_haz_initSEXP, SEXP probsSEXP, SEXP X_testSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP do_rel_survSEXP, SEXP pop_haz_SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
@@ -574,6 +596,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_CLogLogOrdinalBart", (DL_FUNC) &_Batman_CLogLogOrdinalBart, 13},
     {"_Batman_CoxBart", (DL_FUNC) &_Batman_CoxBart, 13},
     {"_Batman_CoxNPHBart", (DL_FUNC) &_Batman_CoxNPHBart, 17},
+    {"_Batman_CoxNPHOBart", (DL_FUNC) &_Batman_CoxNPHOBart, 12},
     {"_Batman_CoxPEBart", (DL_FUNC) &_Batman_CoxPEBart, 17},
     {"_Batman_GammaRegBart", (DL_FUNC) &_Batman_GammaRegBart, 10},
     {"_Batman_MLogitBart", (DL_FUNC) &_Batman_MLogitBart, 11},

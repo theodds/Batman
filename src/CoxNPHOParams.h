@@ -24,6 +24,8 @@ CoxNPHOParams(double scale_lambda_,
 
   arma::vec gamma;
   double sigma_scale_lambda;
+  double shape_gamma;
+  double rate_gamma;
 
   double get_alpha() const {return alpha;}
   double get_beta() const {return beta;}

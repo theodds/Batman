@@ -7,7 +7,7 @@ arma::mat PredictCox(std::vector<CoxNPHONode*>& forest, const arma::mat& X, int 
   int T = forest.size();
   mat out = zeros<mat>(X.n_rows, K-1);
   for(int t = 0; t < T; t++) {
-    out = out + PredictCox(forest[t], X, K-1);
+    out = out + PredictCox(forest[t], X, K);
   }
   return out;
 }
@@ -21,10 +21,10 @@ void UpdateHypers(CoxNPHOParams& cox_params,
   int N = data.Y.n_elem;
   int K = cox_params.gamma.n_elem + 1;
   for(int i = 0; i < N; i++) {
-    if(Y(i) < K - 1) {
+    if(data.Y(i) < K - 1) {
       double U = R::unif_rand();
-      double lambda = exp(cox_params.gamma(Y(i)) + data.lambda_hat(i, Y(i))
-      data.Z(i,Y(i)) = -log(1 - U * (1 - exp(-lambda))) / lambda;
+      double lambda = exp(cox_params.gamma(data.Y(i)) + data.lambda_hat(i, data.Y(i)));
+      data.Z(i,data.Y(i)) = -log(1 - U * (1 - exp(-lambda))) / lambda;
     }
   }
   
@@ -32,9 +32,11 @@ void UpdateHypers(CoxNPHOParams& cox_params,
   vec A = zeros<vec>(K - 1);
   vec B = zeros<vec>(K - 1);
   for(int i = 0; i < N; i++) {
-    A(data.Y(i)) += 1;
-    B(data.Y(i)) += data.Z(i,Y(i)) * exp(data.lambda_hat(i, Y(i)));
-    for(int k = 0; k < Y(i); k++) {
+    if(data.Y(i) < K - 1) {
+      A(data.Y(i)) += 1; 
+      B(data.Y(i)) += data.Z(i,data.Y(i)) * exp(data.lambda_hat(i, data.Y(i)));
+    }
+    for(int k = 0; k < data.Y(i); k++) {
       B(k) += data.Z(i,k) * exp(data.lambda_hat(i, k));
     }
   }
@@ -43,6 +45,7 @@ void UpdateHypers(CoxNPHOParams& cox_params,
     cox_params.gamma(k) = rlgam(A(k) + cox_params.shape_gamma) - 
       log(B(k) + cox_params.rate_gamma);
   }
+  // cox_params.gamma(0) = 0.;
 
   std::vector<double> lambda;
   for(int i = 0; i < trees.size(); i++) {
@@ -110,8 +113,8 @@ List CoxNPHOBart(const arma::mat& X,
   umat counts = zeros<umat>(num_save, probs.n_cols);
 //   vec loglik = zeros<vec>(num_save);
   vec sigma_lambda = zeros<vec>(num_save);
-  vec shape_gamma = zeros<vec>(num_save);
-  vec rate_gamma = zeros<vec>(num_save);
+  vec shape_gamma_out = zeros<vec>(num_save);
+  vec rate_gamma_out = zeros<vec>(num_save);
 
   for(int iter = 0; iter < num_burn; iter++) {
     IterateGibbs(forest.trees, data, cox_params, tree_hypers);
@@ -131,8 +134,8 @@ List CoxNPHOBart(const arma::mat& X,
     gamma.row(iter) = trans(cox_params.gamma);
     counts.row(iter) = trans(get_var_counts(forest.trees));
     sigma_lambda(iter) = cox_params.get_scale_lambda();
-    shape_gamma(iter) = cox_params.shape_gamma;
-    rate_gamma(iter) = cox_params.rate_gamma;
+    shape_gamma_out(iter) = cox_params.shape_gamma;
+    rate_gamma_out(iter) = cox_params.rate_gamma;
 
 // //     loglik(iter) = data.loglik;
   }
@@ -144,8 +147,8 @@ List CoxNPHOBart(const arma::mat& X,
   out["counts"] = counts;
   out["sigma_lambda"] = sigma_lambda;
 //   // out["loglik"] = loglik;
-  out["shape_gamma"] = shape_gamma;
-  out["rate_gamma"] = rate_gamma;
+  out["shape_gamma"] = shape_gamma_out;
+  out["rate_gamma"] = rate_gamma_out;
   return out;
 }
 

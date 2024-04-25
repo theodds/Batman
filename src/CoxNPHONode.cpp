@@ -24,21 +24,22 @@ void CoxNPHONode::UpdateSuffStat(const CoxNPHOData& data, const arma::vec& gamma
 {
   ResetSuffStat();
   int N = data.X.n_rows;
-  int K = data.lambda.n_cols + 1;
+  int K = data.lambda_hat.n_cols + 1;
   for(int i = 0; i < N; i++) {
     rowvec x = data.X.row(i);
     if(data.Y(i) == (K - 1)) {
       for(int k = 0; k < K - 1; k++) {
         double b_float = double(k) / (double(K) - 1);
-        AddSuffStat(0., 1., data.lambda_hat(i,k), data.gamma(k), b_float, x);
+        AddSuffStat(0., 1., data.lambda_hat(i,k), gamma(k), b_float, x);
       }
     }
     else {
-      for(int k = 0; k < Y(i); k++) {
+      for(int k = 0; k < data.Y(i); k++) {
         double b_float = double(k) / (double(K) - 1);
-        AddSuffStat(0., 1., data.lambda_hat(i,k), data.gamma(k), b_float, x);
+        AddSuffStat(0., 1., data.lambda_hat(i,k), gamma(k), b_float, x);
       }
-      AddSuffStat(1., data.Z(i,Y(i)), data.lambda_hat(i,Y(i)), data.gamma(Y(i)), Y(i) / (double(K) - 1), x);
+      AddSuffStat(1., data.Z(i,data.Y(i)), data.lambda_hat(i,data.Y(i)), 
+                  gamma(data.Y(i)), data.Y(i) / (double(K) - 1), x);
     }
   }
 }
@@ -80,19 +81,19 @@ arma::mat PredictCox(CoxNPHONode* tree, const arma::mat& X, int K)
 }
 
 void BackFit(CoxNPHOData& data, CoxNPHONode* tree) {
-  int num_bin = data.Z.n_cols;
+  int num_bin = data.Z.n_cols + 1;
   mat lambda = PredictCox(tree, data.X, num_bin);
   data.lambda_hat = data.lambda_hat - lambda;
 }
 
 void Refit(CoxNPHOData& data, CoxNPHONode* tree) {
-  int num_bin = data.Z.n_cols;
+  int num_bin = data.Z.n_cols + 1;
   mat lambda = PredictCox(tree, data.X, num_bin);
   data.lambda_hat = data.lambda_hat + lambda;
 }
 
 double LogLT(CoxNPHONode* root, const CoxNPHOData& data) {
-  root->UpdateSuffStat(data, root->cox_params.gamma);
+  root->UpdateSuffStat(data, root->cox_params->gamma);
   std::vector<CoxNPHONode*> leafs = leaves(root);
 
   double out = 0.0;
@@ -115,7 +116,7 @@ double LogLT(CoxNPHONode* root, const CoxNPHOData& data) {
 }
 
 void UpdateParams(CoxNPHONode* root, const CoxNPHOData& data) {
-  root->UpdateSuffStat(data, root->cox_params.gamma);
+  root->UpdateSuffStat(data, root->cox_params->gamma);
   std::vector<CoxNPHONode*> leafs = leaves(root);
   int num_leaves = leafs.size();
   double alpha = root->cox_params->get_alpha();
