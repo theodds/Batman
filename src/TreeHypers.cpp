@@ -12,7 +12,8 @@ TreeHypers::TreeHypers(const arma::sp_mat& probs_) {
   logs       = log(s);
 
   // Init non-s members
-  alpha         = 1.0;
+  // alpha         = 1.0;
+  alpha         = 0.1;
   beta          = 2.0;
   gamma         = 0.95;
   alpha_scale   = ((double)(num_groups));
@@ -21,7 +22,7 @@ TreeHypers::TreeHypers(const arma::sp_mat& probs_) {
 
   update_s = true;
   update_alpha = true;
-
+  // update_alpha = false;
 }
 
 arma::uvec TreeHypers::SampleVar() const {

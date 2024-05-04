@@ -5,7 +5,7 @@ library(tidyverse)
 
 ## Generate Data ---------------------------------------------------------------
 
-# set.seed(123)
+set.seed(123)
 
 # Set parameters
 n_samples <- 999
@@ -62,9 +62,9 @@ out <- CLogLogOrdinalBart(
   beta_gamma = 2,
   gamma_0 = log(-log(mean(Y > 1))),
   # gamma_0 = mean(moo[,1]),
-  num_burn = 1000,
+  num_burn = 1500,
   num_thin = 1,
-  num_save = 1000
+  num_save = 1500
 )
 
 p_hat_0 <- colMeans(1 - exp(-exp(out$lambda + out$gamma[,1])))

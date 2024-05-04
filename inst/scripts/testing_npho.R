@@ -5,12 +5,13 @@ library(tidyverse)
 
 ## Generate Data ---------------------------------------------------------------
 
-# set.seed(123)
+set.seed(123)
 
 # Set parameters
-n_samples <- 4999
+n_samples <- 999
 n_features <- 5
 n_categories <- 3
+
 
 # Generate random features
 X <- matrix(rnorm(n_samples * n_features), n_samples, n_features)
@@ -31,6 +32,7 @@ linear_predictor <- X %*% beta
 # Transform linear predictor using the complementary log-log link function
 # and then to probabilities
 
+## Truth --- PH
 p_0 <- 1 - exp(-exp(gamma[1] + linear_predictor))
 p_1 <- exp(-exp(gamma[1] + linear_predictor)) *
   (1 - exp(-exp(gamma[2] + linear_predictor)))
@@ -43,15 +45,36 @@ hist(p_0)
 hist(p_1)
 hist(p_2)
 
+## Truth --- NPH
+X_2 <- cbind(X, rep(0.5, nrow(X)))
+beta_2 <- c(beta, 0.25)
+
+p_0 <- 1 - exp(-exp(gamma[1] + linear_predictor))
+p_1 <- exp(-exp(gamma[1] + linear_predictor)) * 
+  (1 - exp(-exp(gamma[2] + X_2 %*% beta_2)))
+p_2 <- exp(-exp(gamma[1] + linear_predictor)) * 
+  exp(-exp(gamma[2] + X_2 %*% beta_2))
+
+par(mfrow=c(2,2))
+p <- cbind(p_0, p_1, p_2)
+hist(p_0)
+hist(p_1)
+hist(p_2)
+
 ## Get Outcomes
 Y <- sapply(1:nrow(QX), \(i) sample(1:3, 1, prob = p[i,]))
 
 ## Fit model -------------------------------------------------------------------
 
-args(CoxNPHOBart)
+#args(CoxNPHOBart)
 
 QX2 <- cbind(QX, 0)
-s   <- Matrix::Matrix(diag(ncol(QX2)))
+temp <- c(diag(n_features + 1)) 
+temp[length(temp)] <- 0.25
+s <- Matrix::Matrix(temp, n_features + 1, n_features + 1)
+#temp <- c(rep(1, n_features), 0, rep(0, n_features), 1)
+#s <- Matrix::Matrix(temp, n_features + 1, 2, sparse = F)
+#s   <- Matrix::Matrix(diag(ncol(QX2)))
 bin_to_list <- lapply(1:max(Y), function(i) which(Y == i) - 1)
 
 my_fit <-
@@ -70,21 +93,33 @@ my_fit <-
     num_save = 1500
   )
 
-p_0_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,1,]) + my_fit$gamma[,1])))
-p_1_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,2,]) + my_fit$gamma[,2]))) * 
-  t(exp(-exp(t(my_fit$lambda_test[,1,]) + my_fit$gamma[,1])))
+# p_0_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,1,]) + my_fit$gamma[,1])))
+# p_1_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,2,]) + my_fit$gamma[,2]))) * 
+#   t(exp(-exp(t(my_fit$lambda_test[,1,]) + my_fit$gamma[,1])))
+# p_0_hat <- rowMeans(p_0_samps)
+# p_1_hat <- rowMeans(p_1_samps)
+
+p_0_samps <- 1 - exp(- exp(my_fit$lambda_train[,1,] + my_fit$gamma[,1]))
+p_1_samps <- (1 - exp(-exp(my_fit$lambda_train[,2,] + my_fit$gamma[,2]))) * 
+  exp(-exp((my_fit$lambda_train[,1,] + my_fit$gamma[,1])))
 p_0_hat <- rowMeans(p_0_samps)
 p_1_hat <- rowMeans(p_1_samps)
 
-plot(p_0_hat, p_0)
+
+plot(p_0_hat %>% log, p_0 %>% log)
 abline(a=0,b=1,col='green')
-plot(p_1_hat, p_1)
+plot(p_1_hat %>% log, p_1 %>% log)
 abline(a=0,b=1,col='green')
 
-plot(p_hat_0, p_0)
+plot(p_hat_0 %>% log, p_0 %>% log, cex = .2, col = 'blue')
 abline(a=0,b=1,col='green')
-plot((p_hat_1), p_1)
+plot((p_hat_1 %>% log), p_1 %>% log)
 abline(a=0,b=1,col='green')
+
+mean((log(p_hat_0) - log(p_0))^2)
+mean((log(p_0_hat) - log(p_0))^2)
+mean((log(p_hat_1) - log(p_1))^2)
+mean((log(p_1_hat) - log(p_1))^2)
 
 # ## Call Function ---------------------------------------------------------------
 # 
@@ -140,3 +175,4 @@ abline(a=0,b=1,col='green')
 # 
 # plot(rowMeans(out$lambda + out$gamma[,1]))
 # abline(h = gamma[1] + mean(linear_predictor), col = 3)
+
