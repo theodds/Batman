@@ -75,8 +75,8 @@ double LogLT(CLogLogOrdinalNode* root, const CLogLogOrdinalData& data) {
     double alpha_up = alpha + A;
     double beta_up = beta + B;
 
-    out += beta * log(alpha) - R::lgammafn(alpha);
-    out += R::lgammafn(alpha_up) - beta_up * log(alpha_up);
+    out += alpha * log(beta) - R::lgammafn(alpha);
+    out += R::lgammafn(alpha_up) - alpha_up * log(beta_up);
   }
   return out;
 }

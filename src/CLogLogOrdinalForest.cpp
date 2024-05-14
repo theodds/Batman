@@ -68,7 +68,7 @@ void UpdateHypers(CLogLogOrdinalParams& hypers,
   // Update the truncated exponentials
   for(int i = 0; i < N; i++) {
     if(data.Y(i) == K - 1) {
-      data.Z(i) = 0.;
+      data.Z(i) = 1.;
     }
     else {
       double exp_lambda = exp(data.lambda_hat(i) + hypers.gamma(data.Y(i)));
@@ -78,26 +78,38 @@ void UpdateHypers(CLogLogOrdinalParams& hypers,
 
   // Update the gammas
 
-  arma::vec shapes = arma::ones<arma::vec>(K - 1) * hypers.alpha_gamma;
-  arma::vec rates = arma::ones<arma::vec>(K - 1) * hypers.beta_gamma;
+  // arma::vec shapes = arma::ones<arma::vec>(K - 1) * hypers.alpha_gamma;
+  // arma::vec rates = arma::ones<arma::vec>(K - 1) * hypers.beta_gamma;
   
+  // for(int i = 0; i < N; i++) {
+  //   double exp_lambda = exp(data.lambda_hat(i));
+  //   for(int k = 0; k < hypers.gamma.n_elem; k++) {
+  //     if(data.Y(i) == k) {
+  //       shapes(k) += 1;
+  //       rates(k) += data.Z(i) * exp_lambda;
+  //     }
+  //     if(data.Y(i) > k) {
+  //       rates(k) += exp_lambda;
+  //     }
+  //   }
+  // }
+  vec A = zeros<vec>(K - 1);
+  vec B = zeros<vec>(K - 1);
   for(int i = 0; i < N; i++) {
-    double exp_lambda = exp(data.lambda_hat(i));
-    for(int k = 0; k < hypers.gamma.n_elem; k++) {
-      if(data.Y(i) == k) {
-        shapes(k) += 1;
-        rates(k) += data.Z(i) * exp_lambda;
-      }
-      if(data.Y(i) > k) {
-        rates(k) += exp_lambda;
-      }
+    if(data.Y(i) < K - 1) {
+      A(data.Y(i)) += 1;
+      B(data.Y(i)) += data.Z(i) * exp(data.lambda_hat(i));
+    }
+    for(int k = 0; k < data.Y(i); k++) {
+      B(k) += 1. * exp(data.lambda_hat(i));
     }
   }
 
   for(int k = 0; k < hypers.gamma.n_elem; k++) {
-    hypers.gamma(k) = rlgam(shapes(k)) - log(rates(k));
+    // hypers.gamma(k) = rlgam(shapes(k)) - log(rates(k));
+    hypers.gamma(k) = rlgam(A(k) + hypers.alpha_gamma) - log(B(k) + hypers.beta_gamma);
   }
-  // hypers.gamma(0) = hypers.gamma_0;
+  hypers.gamma(0) = hypers.gamma_0;
   
   // Update the segs
   for(int j = 0; j < hypers.seg.n_elem; j++) {

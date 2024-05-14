@@ -21,11 +21,13 @@ struct CLogLogOrdinalSuffStats {
                  double Z,
                  const arma::vec& gamma,
                  const arma::vec& seg) {
-    if(y < gamma.size()) {
+    int K = seg.n_elem;
+    if(y == K - 1) {
+      other_sum += exp(lambda_minus) * seg(y);
+    }
+    else {
       sum_Y_less_K += 1.;
       other_sum += exp(lambda_minus) * (Z * exp(gamma(y)) + seg(y));
-    } else {
-      other_sum += exp(lambda_minus) * seg(y); 
     }
   }
 };
