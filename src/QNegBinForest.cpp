@@ -77,31 +77,58 @@ void UpdateHypers(QNBParams& hypers, std::vector<QNBNode*>& trees,
   // UPDATE THIS!!!
   // UpdateSigmaMu(hypers, trees);
 
-  // Create the Bayesian bootstrap vector
-  // Rcout << "Updating Hypers" << std::endl;
-  int N = data.X.n_rows;
-  vec omega = zeros<vec>(N);
-  for(int i = 0; i < N; i++) {
-    omega(i) = R::rexp(1.0);
-  }
-  double omega_sum = sum(omega);
-  for(int i = 0; i < N; i++) {
-    omega(i) = omega(i) / omega_sum;
-  }
+  //   // Create the Bayesian bootstrap vector
+  //   // Rcout << "Updating Hypers" << std::endl;
+  //   int N = data.X.n_rows;
+  //   vec omega = zeros<vec>(N);
+  //   for(int i = 0; i < N; i++) {
+  //     omega(i) = R::rexp(1.0);
+  //   }
+  //   double omega_sum = sum(omega);
+  //   for(int i = 0; i < N; i++) {
+  //     omega(i) = omega(i) / omega_sum;
+  //   }
 
-  // Update the phi and eta by coordinate ascent/Newton's method
-  double phi = hypers.phi;
-  double eta = -log(hypers.k);
-  newton_rhapson(eta, phi, omega, data);
-  hypers.phi = phi;
-  double k = exp(-eta);
-  if(k > 1E10) k = 1E10;
-  hypers.k = k;
-  // Rcout << "k = " << k << std::endl;
+  //   // Update the phi and eta by coordinate ascent/Newton's method
+  //   double phi = hypers.phi;
+  //   double eta = -log(hypers.k);
+  //   newton_rhapson(eta, phi, omega, data);
+  //   hypers.phi = phi;
+  //   double k = exp(-eta);
+  //   if(k > 1E10) k = 1E10;
+  //   hypers.k = k;
+  //   // Rcout << "k = " << k << std::endl;
 
-  // Update xi
   vec mu = exp(data.lambda_hat);
-  for(int i = 0; i < N; i++) {
+
+  // Update phi and eta by reverting to negative binomial model
+  double phi = 1.;
+  hypers.phi = phi;
+
+  // Update
+  double sigma = 1 / sqrt(hypers.k);
+  double k = hypers.k;
+  int num_update = 10;
+  for(int t = 0; t < num_update; t++) {
+    double sigma_prop = sigma + 0.1 * (2. * R::unif_rand() - 1.);
+    double k_prop = 1. / pow(sigma_prop, 2);
+    if(sigma_prop < 0) continue;
+    double loglik = -sigma;
+    double loglik_prop = -sigma_prop;
+    for(int i = 0; i < mu.n_elem; i++) {
+      loglik += R::lgammafn(k + data.Y(i))  - R::lgammafn(k) +
+        k * log(k / (k + mu(i))) + data.Y(i) * log(mu(i) / (k + mu(i)));
+      loglik_prop += R::lgammafn(k_prop + data.Y(i))  - R::lgammafn(k_prop)
+        + k_prop * log(k_prop / (k_prop + mu(i)))
+        + data.Y(i) * log(mu(i) / (k_prop + mu(i)));
+    }
+    sigma = log(R::unif_rand()) < (loglik_prop - loglik) ? sigma_prop : sigma;
+    k = 1. / pow(sigma, 2);
+  }
+  hypers.k = k;
+  
+  // Update xi
+  for(int i = 0; i < mu.n_elem; i++) {
     double a = (k + data.Y(i)) / hypers.phi;
     double b = (k + mu(i)) / hypers.phi;
     data.xi(i) = R::rgamma(a, 1/b);
@@ -117,9 +144,11 @@ List QNBBart(const arma::mat& X,
              int num_trees,
              double scale_lambda,
              double scale_lambda_0,
+             bool update_s,
              int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
+  tree_hypers.update_s = update_s;
   QNBParams pois_params(scale_lambda_0, scale_lambda, 1.0, 1E10);
   QNBForest forest(num_trees, &tree_hypers, &pois_params);
   QNBData data(X,Y);
