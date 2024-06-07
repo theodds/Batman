@@ -1,9 +1,9 @@
-#ifndef COX_NPHO_DATA_H
-#define COX_NPHO_DATA_H
+#ifndef NPHSBP_DATA_H
+#define NPHSBP_DATA_H
 
 #include <RcppArmadillo.h>
 
-struct CoxNPHOData {
+struct NPHSBPData {
 
   // Raw data
   arma::mat X;
@@ -16,7 +16,7 @@ struct CoxNPHOData {
   arma::mat lambda_hat; // The lambdas, given by output of function
   double loglik;
   
-  CoxNPHOData(const arma::mat& X_,
+  NPHSBPData(const arma::mat& X_,
              const arma::vec& Y_,
              std::vector<std::vector<int>> bin_to_obs_
              ) {

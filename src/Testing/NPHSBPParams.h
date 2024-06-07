@@ -1,13 +1,13 @@
-#ifndef COX_NPHO_PARAMS_H
-#define COX_NPHO_PARAMS_H
+#ifndef NPHSBP_PARAMS_H
+#define NPHSBP_PARAMS_H
 
 #include<RcppArmadillo.h>
 #include "Node.h"
 #include "functions.h"
 
-struct CoxNPHOParams {
+struct NPHSBPParams {
 
-CoxNPHOParams(double scale_lambda_,
+NPHSBPParams(double scale_lambda_,
               double sigma_scale_lambda_,
               double shape_gamma_,
               double rate_gamma_,

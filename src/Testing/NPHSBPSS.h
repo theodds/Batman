@@ -1,11 +1,11 @@
-#ifndef COX_NPHO_SS_H
-#define COX_NPHO_SS_H
+#ifndef NPHSBP_SS_H
+#define NPHSBP_SS_H
 
-struct CoxNPHOSuffStats {
+struct NPHSBPSuffStats {
   double A_l;
   double B_l;
   
-  CoxNPHOSuffStats() {
+  NPHSBPSuffStats() {
     Reset();
   }
 
