@@ -49,8 +49,8 @@ QMultinomBart <- function(X, Y, n, X_test, probs, num_trees, scale_lambda, scale
     .Call(`_Batman_QMultinomBart`, X, Y, n, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
-QNBBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
-    .Call(`_Batman_QNBBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
+QNBBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, update_s, num_burn, num_thin, num_save) {
+    .Call(`_Batman_QNBBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, update_s, num_burn, num_thin, num_save)
 }
 
 QPoisBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
