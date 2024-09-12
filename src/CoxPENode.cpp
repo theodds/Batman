@@ -75,7 +75,6 @@ double LogLT(CoxPENode* root, const CoxPEData& data) {
 
     out += alpha_log_beta - lgamma_alpha
       - alpha_up * log(beta_up)  + R::lgammafn(alpha_up);
-    // out += exp(leafs[i]->ss.sum_delta_lambda_minus);
   }
 
   return out;

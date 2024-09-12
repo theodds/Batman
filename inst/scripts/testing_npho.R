@@ -1,6 +1,7 @@
 ## Load ------------------------------------------------------------------------
 
-library(Batman)
+library(NPHSBP)
+# library(Batman)
 library(tidyverse)
 
 ## Generate Data ---------------------------------------------------------------
@@ -94,7 +95,7 @@ my_fit <-
   )
 
 # p_0_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,1,]) + my_fit$gamma[,1])))
-# p_1_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,2,]) + my_fit$gamma[,2]))) * 
+# p_1_samps <- t(1 - exp(-exp(t(my_fit$lambda_test[,2,]) + my_fit$gamma[,2]))) *
 #   t(exp(-exp(t(my_fit$lambda_test[,1,]) + my_fit$gamma[,1])))
 # p_0_hat <- rowMeans(p_0_samps)
 # p_1_hat <- rowMeans(p_1_samps)
@@ -111,14 +112,14 @@ abline(a=0,b=1,col='green')
 plot(p_1_hat %>% log, p_1 %>% log)
 abline(a=0,b=1,col='green')
 
-plot(p_hat_0 %>% log, p_0 %>% log, cex = .2, col = 'blue')
-abline(a=0,b=1,col='green')
-plot((p_hat_1 %>% log), p_1 %>% log)
-abline(a=0,b=1,col='green')
+# plot(p_hat_0 %>% log, p_0 %>% log, cex = .2, col = 'blue')
+# abline(a=0,b=1,col='green')
+# plot((p_hat_1 %>% log), p_1 %>% log)
+# abline(a=0,b=1,col='green')
 
-mean((log(p_hat_0) - log(p_0))^2)
+# mean((log(p_hat_0) - log(p_0))^2)
 mean((log(p_0_hat) - log(p_0))^2)
-mean((log(p_hat_1) - log(p_1))^2)
+# mean((log(p_hat_1) - log(p_1))^2)
 mean((log(p_1_hat) - log(p_1))^2)
 
 # ## Call Function ---------------------------------------------------------------
