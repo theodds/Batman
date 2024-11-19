@@ -55,6 +55,7 @@ List QGammaBart(const arma::mat& X,
               int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
+  tree_hypers.update_s = false;
   QGammaParams pois_params(scale_lambda_0, scale_lambda, 1.0);
   QGammaForest forest(num_trees, &tree_hypers, &pois_params);
   QGammaData data(X,Y);
