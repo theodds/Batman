@@ -18,11 +18,13 @@ void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
   // UpdateSigmaMu(hypers, trees);
 
   // Create the Bayesian bootstrap vector
+
   int N = data.X.n_rows;
   vec omega = zeros<vec>(N);
   for(int i = 0; i < N; i++) {
     omega(i) = R::rexp(1.0);
   }
+
   double omega_sum = sum(omega);
   for(int i = 0; i < N; i++) {
     omega(i) = omega(i) / omega_sum;
@@ -36,8 +38,28 @@ void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
     Z(i) = pow(data.Y(i) - mu(i), 2) / pow(mu(i), 2);
   }
 
+  // BBQ Update
+  if(hypers.phi_update == 0) {
+    hypers.phi = sum(Z % omega);
+  }
+  // PLP Update
+  if(hypers.phi_update == 1) {
+    double phi_hat = mean(Z);
+    hypers.phi = 1 / R::rgamma(0.5 * N, 1.0 / (0.5 * N * phi_hat));
+  }
+  // EQP Update
+  if(hypers.phi_update == 2) {
+    double deviance = 0;
+    for(int i = 0; i < N; i++) {
+      deviance += 2 * (-1.) - 2 * log((data.Y(i))) + 2 * data.Y(i) / mu(i) +
+        2 * log((mu(i)));
+    }
+    double shape = 0.5 * N;
+    double rate = 0.5 * deviance;
+    hypers.phi = 1 / R::rgamma(shape, 1.0 / rate);
+  }
+
   // Update phi
-  hypers.phi = sum(Z % omega);
   // Rcout << "hypers.phi = sum(Z % omega);" << "    " << hypers.phi << std::endl;
   // double phi_hat = sum(Z) / N;
   // hypers.phi = R::rgamma(0.5 * N, 2. * phi_hat / N);
@@ -46,17 +68,18 @@ void UpdateHypers(QGammaParams& hypers, std::vector<QGammaNode*>& trees,
 
 // [[Rcpp::export]]
 List QGammaBart(const arma::mat& X,
-              const arma::vec& Y,
-              const arma::mat& X_test,
-              const arma::sp_mat& probs,
-              int num_trees,
-              double scale_lambda,
-              double scale_lambda_0,
-              int num_burn, int num_thin, int num_save)
+                const arma::vec& Y,
+                const arma::mat& X_test,
+                const arma::sp_mat& probs,
+                int num_trees,
+                double scale_lambda,
+                double scale_lambda_0,
+                int phi_update,
+                int num_burn, int num_thin, int num_save)
 {
   TreeHypers tree_hypers(probs);
-  tree_hypers.update_s = false;
-  QGammaParams pois_params(scale_lambda_0, scale_lambda, 1.0);
+  // tree_hypers.update_s = true;
+  QGammaParams pois_params(scale_lambda_0, scale_lambda, 1.0, phi_update);
   QGammaForest forest(num_trees, &tree_hypers, &pois_params);
   QGammaData data(X,Y);
   mat lambda = zeros<mat>(num_save, Y.size());

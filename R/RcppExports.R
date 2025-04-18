@@ -13,8 +13,8 @@ CoxBart <- function(X, Y, delta, order, L, U, probs, X_test, num_trees, scale_la
     .Call(`_Batman_CoxBart`, X, Y, delta, order, L, U, probs, X_test, num_trees, scale_lambda, num_burn, num_thin, num_save)
 }
 
-CoxNPHBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save) {
-    .Call(`_Batman_CoxNPHBart`, X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save)
+CoxNPHBart <- function(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, update_s, update_alpha, pop_haz_, num_burn, num_thin, num_save) {
+    .Call(`_Batman_CoxNPHBart`, X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, update_s, update_alpha, pop_haz_, num_burn, num_thin, num_save)
 }
 
 CoxNPHOBart <- function(X, Y, bin_to_obs_list, probs, X_test, num_trees, scale_lambda, shape_gamma, rate_gamma, num_burn, num_thin, num_save) {
@@ -41,8 +41,8 @@ QBinomBart <- function(X, Y, n, X_test, probs, num_trees, scale_lambda, scale_la
     .Call(`_Batman_QBinomBart`, X, Y, n, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
 }
 
-QGammaBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {
-    .Call(`_Batman_QGammaBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save)
+QGammaBart <- function(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, phi_update, num_burn, num_thin, num_save) {
+    .Call(`_Batman_QGammaBart`, X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, phi_update, num_burn, num_thin, num_save)
 }
 
 QMultinomBart <- function(X, Y, n, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save) {

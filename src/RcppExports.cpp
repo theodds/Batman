@@ -85,8 +85,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // CoxNPHBart
-List CoxNPHBart(const arma::mat& X, const arma::vec& Y, const arma::uvec& delta, Rcpp::List bin_to_obs_list, const arma::uvec& obs_to_bin, const arma::vec& time_grid, const arma::vec& bin_width, const arma::vec& base_haz_init, const arma::sp_mat& probs, const arma::mat& X_test, int num_trees, double scale_lambda, bool do_rel_surv, const arma::vec& pop_haz_, int num_burn, int num_thin, int num_save);
-RcppExport SEXP _Batman_CoxNPHBart(SEXP XSEXP, SEXP YSEXP, SEXP deltaSEXP, SEXP bin_to_obs_listSEXP, SEXP obs_to_binSEXP, SEXP time_gridSEXP, SEXP bin_widthSEXP, SEXP base_haz_initSEXP, SEXP probsSEXP, SEXP X_testSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP do_rel_survSEXP, SEXP pop_haz_SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+List CoxNPHBart(const arma::mat& X, const arma::vec& Y, const arma::uvec& delta, Rcpp::List bin_to_obs_list, const arma::uvec& obs_to_bin, const arma::vec& time_grid, const arma::vec& bin_width, const arma::vec& base_haz_init, const arma::sp_mat& probs, const arma::mat& X_test, int num_trees, double scale_lambda, bool do_rel_surv, bool update_s, bool update_alpha, const arma::vec& pop_haz_, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_CoxNPHBart(SEXP XSEXP, SEXP YSEXP, SEXP deltaSEXP, SEXP bin_to_obs_listSEXP, SEXP obs_to_binSEXP, SEXP time_gridSEXP, SEXP bin_widthSEXP, SEXP base_haz_initSEXP, SEXP probsSEXP, SEXP X_testSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP do_rel_survSEXP, SEXP update_sSEXP, SEXP update_alphaSEXP, SEXP pop_haz_SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -103,11 +103,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
     Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
     Rcpp::traits::input_parameter< bool >::type do_rel_surv(do_rel_survSEXP);
+    Rcpp::traits::input_parameter< bool >::type update_s(update_sSEXP);
+    Rcpp::traits::input_parameter< bool >::type update_alpha(update_alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type pop_haz_(pop_haz_SEXP);
     Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
     Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
     Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
-    rcpp_result_gen = Rcpp::wrap(CoxNPHBart(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, pop_haz_, num_burn, num_thin, num_save));
+    rcpp_result_gen = Rcpp::wrap(CoxNPHBart(X, Y, delta, bin_to_obs_list, obs_to_bin, time_grid, bin_width, base_haz_init, probs, X_test, num_trees, scale_lambda, do_rel_surv, update_s, update_alpha, pop_haz_, num_burn, num_thin, num_save));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -243,8 +245,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QGammaBart
-List QGammaBart(const arma::mat& X, const arma::vec& Y, const arma::mat& X_test, const arma::sp_mat& probs, int num_trees, double scale_lambda, double scale_lambda_0, int num_burn, int num_thin, int num_save);
-RcppExport SEXP _Batman_QGammaBart(SEXP XSEXP, SEXP YSEXP, SEXP X_testSEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP scale_lambda_0SEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
+List QGammaBart(const arma::mat& X, const arma::vec& Y, const arma::mat& X_test, const arma::sp_mat& probs, int num_trees, double scale_lambda, double scale_lambda_0, int phi_update, int num_burn, int num_thin, int num_save);
+RcppExport SEXP _Batman_QGammaBart(SEXP XSEXP, SEXP YSEXP, SEXP X_testSEXP, SEXP probsSEXP, SEXP num_treesSEXP, SEXP scale_lambdaSEXP, SEXP scale_lambda_0SEXP, SEXP phi_updateSEXP, SEXP num_burnSEXP, SEXP num_thinSEXP, SEXP num_saveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -255,10 +257,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type num_trees(num_treesSEXP);
     Rcpp::traits::input_parameter< double >::type scale_lambda(scale_lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type scale_lambda_0(scale_lambda_0SEXP);
+    Rcpp::traits::input_parameter< int >::type phi_update(phi_updateSEXP);
     Rcpp::traits::input_parameter< int >::type num_burn(num_burnSEXP);
     Rcpp::traits::input_parameter< int >::type num_thin(num_thinSEXP);
     Rcpp::traits::input_parameter< int >::type num_save(num_saveSEXP);
-    rcpp_result_gen = Rcpp::wrap(QGammaBart(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, num_burn, num_thin, num_save));
+    rcpp_result_gen = Rcpp::wrap(QGammaBart(X, Y, X_test, probs, num_trees, scale_lambda, scale_lambda_0, phi_update, num_burn, num_thin, num_save));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -589,6 +592,7 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_qpois_forest();
 RcppExport SEXP _rcpp_module_boot_var_forest();
 RcppExport SEXP _rcpp_module_boot_weib_forest();
 
@@ -596,14 +600,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_Batman", (DL_FUNC) &_Batman_Batman, 17},
     {"_Batman_CLogLogOrdinalBart", (DL_FUNC) &_Batman_CLogLogOrdinalBart, 13},
     {"_Batman_CoxBart", (DL_FUNC) &_Batman_CoxBart, 13},
-    {"_Batman_CoxNPHBart", (DL_FUNC) &_Batman_CoxNPHBart, 17},
+    {"_Batman_CoxNPHBart", (DL_FUNC) &_Batman_CoxNPHBart, 19},
     {"_Batman_CoxNPHOBart", (DL_FUNC) &_Batman_CoxNPHOBart, 12},
     {"_Batman_CoxPEBart", (DL_FUNC) &_Batman_CoxPEBart, 17},
     {"_Batman_GammaRegBart", (DL_FUNC) &_Batman_GammaRegBart, 10},
     {"_Batman_MLogitBart", (DL_FUNC) &_Batman_MLogitBart, 11},
     {"_Batman_PoisBart", (DL_FUNC) &_Batman_PoisBart, 10},
     {"_Batman_QBinomBart", (DL_FUNC) &_Batman_QBinomBart, 11},
-    {"_Batman_QGammaBart", (DL_FUNC) &_Batman_QGammaBart, 10},
+    {"_Batman_QGammaBart", (DL_FUNC) &_Batman_QGammaBart, 11},
     {"_Batman_QMultinomBart", (DL_FUNC) &_Batman_QMultinomBart, 11},
     {"_Batman_QNBBart", (DL_FUNC) &_Batman_QNBBart, 11},
     {"_Batman_QPoisBart", (DL_FUNC) &_Batman_QPoisBart, 10},
@@ -624,6 +628,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Batman_rcpparma_outerproduct", (DL_FUNC) &_Batman_rcpparma_outerproduct, 1},
     {"_Batman_rcpparma_innerproduct", (DL_FUNC) &_Batman_rcpparma_innerproduct, 1},
     {"_Batman_rcpparma_bothproducts", (DL_FUNC) &_Batman_rcpparma_bothproducts, 1},
+    {"_rcpp_module_boot_qpois_forest", (DL_FUNC) &_rcpp_module_boot_qpois_forest, 0},
     {"_rcpp_module_boot_var_forest", (DL_FUNC) &_rcpp_module_boot_var_forest, 0},
     {"_rcpp_module_boot_weib_forest", (DL_FUNC) &_rcpp_module_boot_weib_forest, 0},
     {NULL, NULL, 0}

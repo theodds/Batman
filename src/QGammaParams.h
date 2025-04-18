@@ -9,10 +9,13 @@ struct QGammaParams {
   double scale_lambda_0;
   double sigma_scale_lambda;
   double phi;
+  int phi_update;
+  
 
-  QGammaParams(double scale_lambda_0_, double scale_lambda_, double phi_) :
-    scale_lambda(scale_lambda_), 
+QGammaParams(double scale_lambda_0_, double scale_lambda_, double phi_, int phi_update_) :
+  scale_lambda(scale_lambda_), 
     phi(phi_),
+    phi_update(phi_update_),
     sigma_scale_lambda(scale_lambda_),
     scale_lambda_0(scale_lambda_0_) {
     scale_lambda_to_ab();

@@ -12,6 +12,11 @@ arma::vec PredictPois(std::vector<QPoisNode*>& forest, const arma::mat& X) {
   return out;
 }
 
+arma::vec QPoisForest::do_predict(const arma::mat& X) {
+  return PredictPois(trees, X);
+}
+
+
 void UpdateHypers(QPoisParams& hypers, std::vector<QPoisNode*>& trees,
                   const QPoisData& data)
 {
@@ -88,4 +93,45 @@ List QPoisBart(const arma::mat& X,
   out["phi"] = phi;
 
   return out;
+}
+
+Rcpp::List  QPoisForest::do_gibbs(const arma::mat& X,
+                                  const arma::vec& Y,
+                                  const arma::vec& offset,
+                                  const arma::mat& X_test,
+                                  int num_iter)
+
+
+{
+  mat lambda_out = zeros<mat>(num_iter, X_test.n_rows);
+  List out;
+  QPoisData data(X,Y);
+  data.lambda_hat = do_predict(X) + offset;
+  for(int i = 0; i < num_iter; i++) {
+    IterateGibbs(trees, data, *params, *tree_hypers);
+    lambda_out.row(i) = trans(do_predict(X_test));
+  }
+  
+  out["lambda"] = lambda_out;
+  return out;
+}
+
+
+
+RCPP_MODULE(qpois_forest) {
+
+  class_<QPoisForest>("QPoisForest")
+    .constructor<Rcpp::List, Rcpp::List>()
+    .method("do_gibbs", &QPoisForest::do_gibbs)
+    .method("get_s", &QPoisForest::get_s)
+    .method("get_counts", &QPoisForest::get_counts)
+    .method("get_sigma_mu", &QPoisForest::get_sigma_mu)
+    .method("get_phi", &QPoisForest::get_phi)
+    .method("set_phi", &QPoisForest::set_phi)
+    .method("do_predict", &QPoisForest::do_predict)
+    // .method("get_tree_counts", &Forest::get_tree_counts)
+    // .method("predict_iteration", &Forest::predict_iteration)
+    ;
+
+  
 }

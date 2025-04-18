@@ -70,7 +70,8 @@ fitted_qgamma <-
     50,
     scale_lambda_0 = 1,
     scale_lambda = 1 / sqrt(50),
-    num_burn = 1000,
+    num_burn = 1000, 
+    phi_update = 0,
     num_thin = 1,
     num_save = 1000
   )
@@ -88,6 +89,15 @@ rmse(mu_0, mu_hat_qpow)
 
 plot(mu_hat_qgam, mu_0)
 plot(mu_hat_qpow, mu_0)
+
+## Testing phi and kappa ----
+
+par(mfrow = c(1,2))
+
+plot(fitted_qpower$phi, type = 'l')
+abline(h = 0.5, col = 3, lwd = 3)
+plot(fitted_qpower$p, type = 'l')
+abline(h = 2, col = 3, lwd = 3)
 
 # fitted_dbart <-
 #   bart(

@@ -61,20 +61,22 @@ void UpdateScaleLambda(CoxNPHParams& cox_params, std::vector<double>& lambda)
 
 // [[Rcpp::export]]
 List CoxNPHBart(const arma::mat& X,
-               const arma::vec& Y,
-               const arma::uvec& delta,
-               Rcpp::List bin_to_obs_list,
-               const arma::uvec& obs_to_bin,
-               const arma::vec& time_grid,
-               const arma::vec& bin_width,
-               const arma::vec& base_haz_init,
-               const arma::sp_mat& probs,
-               const arma::mat& X_test,
-               int num_trees,
-               double scale_lambda,
-               bool do_rel_surv,
-               const arma::vec& pop_haz_,
-               int num_burn, int num_thin, int num_save)
+                const arma::vec& Y,
+                const arma::uvec& delta,
+                Rcpp::List bin_to_obs_list,
+                const arma::uvec& obs_to_bin,
+                const arma::vec& time_grid,
+                const arma::vec& bin_width,
+                const arma::vec& base_haz_init,
+                const arma::sp_mat& probs,
+                const arma::mat& X_test,
+                int num_trees,
+                double scale_lambda,
+                bool do_rel_surv,
+                bool update_s,
+                bool update_alpha,
+                const arma::vec& pop_haz_,
+                int num_burn, int num_thin, int num_save)
 {
   std::vector<std::vector<int>> bin_to_obs 
     = convertListToVector(bin_to_obs_list);
@@ -82,6 +84,10 @@ List CoxNPHBart(const arma::mat& X,
   int num_bin = base_haz_init.n_elem;
   
   TreeHypers tree_hypers(probs);
+  tree_hypers.update_s = update_s;
+  tree_hypers.update_alpha = update_alpha;
+  tree_hypers.alpha = 1.;
+
   CoxNPHParams cox_params(scale_lambda, scale_lambda);
   CoxNPHForest forest(num_trees, &tree_hypers, &cox_params);
   CoxNPHData data(X, Y, delta, bin_to_obs, obs_to_bin, time_grid,

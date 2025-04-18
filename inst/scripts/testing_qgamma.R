@@ -20,7 +20,7 @@ sim_fried_gamma <- function(N, P, phi = 0.5) {
   f <- function(x)
     exp(10 * sin(pi * x[,1] * x[,2]) + 20 * (x[,3]-0.5)^2 + 10 * x[,4] + 5 * x[,5])^(1/10)
   
-  phi <- 0.5
+  # phi <- 0.5
   mu <- f(X)
   alpha <- 1 / phi
   beta <- alpha / mu
@@ -46,11 +46,14 @@ fitted_qgam <-
     probs,
     50,
     scale_lambda_0 = 1,
-    scale_lambda = 1 / sqrt(50),
+    scale_lambda = 1 / sqrt(50), 
+    phi_update = 2,
     num_burn = 3000,
     num_thin = 1,
     num_save = 3000
   )
+
+hist(fitted_qgam$phi)
 
 ## Comparing with dbarts ----
 

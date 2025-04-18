@@ -46,3 +46,25 @@ rmse(log(lambda), colMeans(out$lambda))
 
 hist(out$phi)
 (apply(out$lambda, MARGIN = 2, sd) / apply(out_pos$lambda, MARGIN = 2, FUN = sd)) %>% hist()
+
+## Testing the new framework ----
+
+probs <- Matrix::Matrix(diag(ncol(X))) ## Sparsity
+qpois_forest <- MakeQPois(probs = probs, ## Make tree
+                          num_tree = num_tree,
+                          k = 1.5,
+                          update_s = FALSE,
+                          phi = 1)
+
+pb <- progress::progress_bar$new(
+  format = "  running :what [:bar] :percent eta: :eta",
+  clear = FALSE, total = 1000, width = 60)
+stuff <- matrix(nrow = 1000, ncol = nrow(X))
+
+for(i in 1:1000) {
+  pb$tick()
+  stuff[i,] <- as.numeric(qpois_forest$do_gibbs(X, Y, 
+                                                rep(0, nrow(X)), X, 1)[[1]])
+}
+
+
